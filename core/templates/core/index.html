@@ -1,0 +1,971 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+<title>{% block title %}Welcome{% endblock %} | Curated Vintage Clothing & Accessories</title>
+
+{% block content %}
+
+<style>
+    main {
+        padding: 0rem 0rem 4rem 0rem;
+        margin: 0px auto;
+    }
+    body {
+        background-color: #f7f2f1;
+    }
+
+    .header-div{
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        margin: 0rem 0 3rem 0; 
+        padding: 0 1rem;
+    }
+    
+    @media (max-width: 425px) {
+        .header-div{
+            margin: 1rem 0 1rem 0; 
+        }
+    }
+
+    .headline-svg{
+        margin-bottom: 4rem; margin-left:-.65rem;
+        width: 450px;
+    }
+
+    @media (max-width: 425px) {
+        .headline-svg{
+            width:350px;
+        }
+    }
+    /* Mobile (≤ 375px) */
+    @media (max-width: 375px) {
+        .headline-svg{
+            width:270px;
+        }
+    }
+
+    /* Hide top searchbar on index homepage */
+    .persistent-searchbar-wrapper {
+        display:none !important;
+    }
+
+    .persistent-searchbar-wrapper-index {
+        width: 100%;
+        max-width: 600px;
+    }
+
+    /* Default Font Sizes */
+    .AdobeCaslonProItalic {
+        font-family: AdobeCaslonProItalic;
+        font-size: 3rem;
+        line-height: 1.1;
+        letter-spacing: -.1rem;
+        opacity: .85;
+    }
+    .AdobeCaslonProItalic-small {
+        font-family: AdobeCaslonProItalic;
+        font-size: 1.5rem;
+        line-height: 2rem;
+        letter-spacing: -.01rem;
+    }
+    .AdobeCaslonProRegular {
+        font-family: AdobeCaslonProRegular;
+        font-size: 1.6rem;
+        line-height: 2rem;
+        margin-bottom: 2rem;
+    }
+    .AnturaScript {
+            margin-bottom: 1rem;
+            font-size: 3.75rem;
+     }
+
+    /* Mobile (≤ 425px) */
+    @media (max-width: 425px) {
+        main {
+            margin-top: .5rem;
+        }
+        .title {
+            right: -5%;
+            padding-bottom: 1.5rem;
+        }
+        .AnturaScript {
+            margin-bottom: 1rem;
+            font-size: 4rem;
+            padding-right: 2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+            margin-right: -2.6rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+        }
+        .AdobeCaslonProItalic {
+            font-size: 3.75rem;
+            padding: 4rem 0 1.5rem 0;
+        }
+        .AdobeCaslonProItalic-small {
+            font-size: 1rem;
+            line-height: 1.5rem;
+        }
+        .AdobeCaslonProRegular {
+            font-size: 1.25rem;
+            line-height: 1.5rem;
+        }
+    }
+
+    /* Tablet (≥ 768px) */
+    @media (min-width: 768px) {
+        main {
+            margin-top: 1rem;
+        }
+        .title {
+            padding-bottom: 2.5rem;
+        }
+        .AnturaScript {
+            margin-bottom: 1rem;
+            font-size: 5.65rem;
+            letter-spacing: -0.65rem !important;
+            padding-right: 2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+            margin-right: -2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+        }
+        .AdobeCaslonProItalic {
+            font-size: 4.4375rem;
+        }
+      
+    }
+
+    /* Desktop (≥ 1024px) */
+    @media (min-width: 1024px) {
+        main {
+            margin-top: 3.5rem;
+        }
+        .title {
+            padding-bottom: 2rem;
+        }
+        .AnturaScript {
+            font-size: 8.5rem;
+            margin: 0;
+            letter-spacing: -1.25rem !important;
+            padding-right: 2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+            margin-right: -2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+        }
+        .AdobeCaslonProItalic {
+            font-size: 5.875rem;
+            padding-top: 4rem;
+            margin: 0;
+        }
+    }
+
+
+
+
+
+
+
+
+
+    /* FEATURED ITEMS */
+
+    /* desktop */
+    #featured-section, #designer-section, #under-radar-section {
+    padding: 5rem 2rem 9rem 2rem;
+    }
+
+    /* tablet */
+    @media (max-width: 768px) {
+        #featured-section, #designer-section, #under-radar-section {
+        padding: 4rem 0rem 8rem 0rem;
+        }     
+    }
+
+    /* mobile */
+    @media (max-width: 425px) {
+        .title {
+            position: relative;
+        }
+        #featured-section, #designer-section, #under-radar-section {
+        padding: 4rem 2rem 8rem 0rem;
+        }     
+    }
+
+    .featured-items-container {
+        position: relative;
+    }
+
+    .featured-items-wrapper {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 0 auto;
+    }
+
+    .featured-item {
+        position: relative;
+        background: white;
+        border-radius: 2rem;
+        overflow: hidden;
+    }
+
+    .featured-item a {
+        position: relative;
+        display: block;
+        width: 100%;
+        aspect-ratio: 3 / 4; 
+        overflow: hidden;
+    }
+
+    .featured-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    /* Dark overlay on hover for index featured items */
+    .featured-item a::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0);
+        transition: background 0.3s ease;
+        pointer-events: none;
+    }
+
+    .featured-item:hover a::after {
+        background: rgba(33, 21, 21, 0.2); /* 20% black overlay */
+    }
+
+    /* Hide arrow on desktop */
+    .carousel-nav-arrow {
+        display: none;
+        pointer-events: auto;
+        touch-action: manipulation;
+    }
+
+    .carousel-nav-arrow svg {
+        pointer-events: none;
+    }
+
+
+    /* See All Item Styles */
+    .see-all-item {
+        background: #F9F5F2;
+        border: 1px solid #E4DBD6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .see-all-content {
+        text-align: center;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        color: #48110C;
+        transition: transform 0.3s ease;
+    }
+
+    .see-all-item:hover .see-all-content {
+        transform: scale(1.05);
+    }
+
+    .see-all-content svg {
+        color: #48110C;
+        margin-bottom: 0.5rem;
+    }
+
+    .see-all-content p {
+        margin: 0;
+        color: #48110C;
+    }
+
+    /* Ensure the see-all item maintains aspect ratio */
+    .see-all-item a {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 3 / 4;
+    }
+
+    
+    /* Mobile + Tablet styles */
+    @media screen and (max-width: 1023px) {
+        .featured-items-container {
+            overflow: hidden;
+            margin: 0 -2rem 0 0; /* Extend to screen edges */
+            padding: 0 -2rem 0 0;
+        }
+        
+        .featured-items-wrapper {
+            display: flex; /* Change from grid to flex */
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 2rem;
+            /* Hide scrollbar */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .featured-items-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .featured-item {
+            flex: 0 0 75%; /* Show 75% of card */
+            scroll-snap-align: center;
+            max-width: 300px;
+        }
+        
+        /* Show arrow on mobile */
+        .carousel-nav-arrow {
+            display: flex;
+            position: absolute;
+            right: 1rem;
+            top: 45%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .carousel-nav-arrow:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        
+        .carousel-nav-arrow svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #48110C;
+        }
+    }
+
+    /* Desktop */
+    @media (min-width: 1024px) {
+        .featured-items-wrapper {
+            grid-template-columns: repeat(5, 1fr);
+            max-width: 1400px;
+        }
+    }
+
+    /* tablet */
+    @media (min-width: 768px) {
+        .featured-item a {
+            max-height: 400px;
+            aspect-ratio: 3 / 4; 
+        }       
+    }
+
+    .browse-btn {
+        min-width: 3.375rem;
+        border-radius: 4rem;
+        padding: .5rem 1rem;
+        
+        /* Toggle button styling */
+        border: 1px solid transparent;
+        cursor: pointer;
+        font-weight: 400;
+        transition: all 0.2s ease;
+        
+        /* Default state - outlined style */
+        color: #48110C;
+        border-color: currentColor;
+    }
+
+    .browse-btn:hover {
+        color: #48110C !important;
+        border-color: transparent;
+        background-color: #ffffff;
+        transform: none;
+        box-shadow: none;
+    }
+
+
+
+
+
+
+    /* Curated Filters Styling */
+    .curated-filters-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+        justify-content: center
+    }
+
+    .curated-filter-btn {
+        position: relative;
+        min-width: 3.375rem;
+        border-radius: 4rem;
+        text-align: center;
+        padding: .5rem 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        
+        /* Toggle button styling */
+        border: 1px solid transparent;
+        cursor: pointer;
+        font-weight: 400;
+        transition: all 0.2s ease;
+        
+        /* Default state - outlined style */
+        color: #374151;
+        border-color: currentColor;
+    }
+
+    /* ACTIVE (PRESSED) STATE - Filled style */
+    .curated-filter-btn.active {
+        border-color: transparent;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Theme-specific colors */
+    .curated-filter-btn.vacation {
+        border-color: #ffa358;
+        color: #ff860c;
+    }
+
+    .curated-filter-btn.vacation:hover {
+        background: #ffa358;
+        color: #48110C;
+    }
+
+    .curated-filter-btn.linen {
+        border-color: #e0c19a;
+        color: #8b7355;
+    }
+
+    .curated-filter-btn.linen:hover {
+        background: #e0c19a;
+        color: #48110C;
+    }
+
+    .curated-filter-btn.date-night {
+        border-color: #ff7777;
+        color: #f35656;
+    }
+
+    .curated-filter-btn.date-night:hover {
+        background: #ff7777;
+        color: #48110C;
+    }
+
+    .curated-filter-btn.designer {
+        border-color: #ff99cc;
+        color: #ef6faf;
+    }
+
+    .curated-filter-btn.designer:hover {
+        background: #ff99cc;
+        color: #48110C;
+    }
+
+    .curated-filter-btn.wedding-guest {
+        border-color: #dfa5a5;
+        color: #cb7c7c;
+    }
+
+    .curated-filter-btn.wedding-guest:hover {
+        background: #dfa5a5;
+        color: #48110C;
+    }
+
+        
+</style>
+
+
+
+    <div class="header-div">
+        
+        <div class="headline-svg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 126" fill="none">
+                <path d="M34.8875 46.872C23.0715 46.872 18.3675 42.224 19.2075 35.952C21.0555 23.128 45.0795 3.472 78.5675 3.472C84.1115 3.472 89.3195 4.144 93.7435 5.488C99.1755 2.24 105.223 0.223997 112.167 0.223997C118.999 0.223997 121.743 4.59199 121.015 9.8C120.903 10.696 120.679 11.536 120.399 12.376L119.839 12.264C120.119 11.424 120.343 10.584 120.455 9.8C121.127 4.928 118.608 0.783997 112.111 0.783997C106.175 0.783997 100.855 2.856 96.0395 6.216C103.263 8.904 107.855 13.496 106.959 19.824C106.007 26.376 96.8795 34.104 82.5995 34.104C81.6475 34.104 80.6395 34.104 79.6875 34.048C83.2715 35.896 84.6715 39.928 83.9995 44.744C83.6635 47.376 82.5995 50.288 80.9755 53.088C76.7755 60.256 73.8635 67.032 73.1355 72.184C71.7915 82.04 77.1115 88.816 86.2955 88.816H87.0795L87.0235 89.152H85.7915C74.5355 89.152 67.8155 82.432 69.2155 72.184C69.9995 66.696 73.3595 59.584 78.0635 51.856C80.0235 48.664 81.3675 45.36 81.7595 42.392C82.4875 37.408 80.5275 33.544 74.4795 33.544L74.5915 33.04C74.9835 33.04 76.0475 33.096 77.0555 33.208C79.0715 33.432 80.9195 33.544 82.6555 33.544C94.2475 33.544 102.143 26.04 103.039 19.824C103.823 14.056 100.407 9.8 94.8075 7.168C89.7675 10.92 85.1195 16.072 80.6395 21.728C76.6075 26.768 73.0795 31.472 69.2155 36.008C59.6955 47.376 48.1035 59.248 33.0395 65.8C34.7195 66.192 36.5115 66.584 38.5275 66.976L37.6315 67.536C35.5595 67.088 33.7675 66.64 32.0875 66.248C24.8635 69.272 16.7995 71.12 7.83949 71.12C3.02349 71.12 0.895489 69.552 1.11949 67.816C1.45549 65.576 5.82349 62.944 13.9995 62.944C20.8875 62.944 25.3115 63.952 31.1355 65.352C45.7515 58.408 56.7275 45.64 66.4715 33.656C70.3355 28.896 74.0875 24.08 78.0635 19.432C82.5435 14.28 87.1915 9.632 92.5115 6.216C88.5355 4.816 83.6075 4.03199 78.4555 4.03199C47.3195 4.03199 24.9195 23.352 23.1275 35.952C22.2875 41.888 25.8155 46.312 34.9435 46.312C49.1115 46.312 62.4395 33.32 63.6155 24.976C64.1195 21.168 62.2715 18.368 56.7835 18.368C48.2715 18.368 39.8715 26.096 35.5595 32.256L35.1115 32.032C39.5915 25.76 48.1595 17.808 56.8395 17.808C63.8955 17.808 66.4155 20.832 65.8555 24.976C64.6235 33.544 50.2875 46.872 34.8875 46.872ZM7.95149 70.56C16.2955 70.56 23.6315 68.768 30.2955 65.744C25.4235 64.512 20.9995 63.448 13.8875 63.448C7.55949 63.448 3.58349 66.024 3.30349 68.096C3.07949 69.44 4.53549 70.56 7.95149 70.56ZM105.059 41.368H106.879C107.087 41.368 107.139 41.628 107.035 41.836C106.047 43.968 103.395 51.144 103.135 51.976C102.823 52.86 100.639 59.308 100.639 59.776C100.639 60.244 100.899 60.4 101.211 60.4C101.835 60.4 104.487 57.696 104.851 57.228C105.007 57.072 105.163 56.968 105.267 57.124L105.735 57.644C105.891 57.8 105.943 57.904 105.839 58.06C105.267 59.1 100.743 63.52 97.779 63.52C97.155 63.52 96.687 63.312 96.687 62.636C96.687 61.856 97.207 60.244 99.183 54.732L98.923 54.628C96.739 57.956 91.487 63.52 87.795 63.52C86.599 63.52 84.987 62.532 84.987 60.192C84.987 52.6 93.515 41.368 99.859 41.368C102.043 41.368 103.031 42.304 103.551 43.136L104.539 41.732C104.695 41.524 104.851 41.368 105.059 41.368ZM90.187 60.764C92.787 60.764 99.391 52.34 100.327 50.416C101.055 48.908 101.575 47.608 101.575 46.1C101.575 44.696 101.055 43.032 99.131 43.032C94.347 43.032 88.783 54.004 88.783 58.944C88.783 60.14 89.303 60.764 90.187 60.764ZM110.887 63H108.807C108.443 63 108.235 62.792 108.339 62.532L111.251 54.108C112.187 51.196 113.799 45.736 113.799 45.008C113.799 44.54 113.383 44.228 112.915 44.228C111.875 44.228 109.535 46.568 108.807 47.452C108.703 47.608 108.495 47.556 108.391 47.452L107.871 46.932C107.767 46.828 107.767 46.672 107.871 46.516C108.963 44.904 112.083 41.368 115.619 41.368C116.659 41.368 117.075 42.252 117.075 43.188C117.127 44.176 116.243 47.088 115.203 50.572L115.463 50.676C116.867 47.764 121.027 41.368 123.939 41.368C125.447 41.368 126.383 42.304 126.383 43.708C126.383 45.06 125.343 46.1 124.355 46.1C123.887 46.1 123.471 45.996 123.055 45.58C122.639 45.164 122.379 44.956 121.703 44.956C120.299 44.956 117.387 49.428 115.307 52.86C114.683 53.848 114.059 55.044 113.279 57.384L111.563 62.636C111.459 63 111.303 63 110.887 63ZM129.676 63.52C126.296 63.52 124.84 61.856 124.84 58.424C124.84 54.056 127.7 48.596 131.496 44.852C133.16 43.188 135.968 41.368 138.464 41.368C140.492 41.368 141.428 42.876 141.428 44.124C141.428 46.672 139.504 49.376 136.592 50.884C133.784 52.288 130.976 52.86 129.052 53.016C128.792 53.64 128.376 55.356 128.376 57.8C128.376 60.14 130.092 61.076 131.08 61.076C133.628 61.076 135.916 59.152 137.008 57.384C137.112 57.228 137.268 57.124 137.476 57.332L138.048 57.8C138.308 57.956 138.308 58.112 138.1 58.268C136.8 60.088 133.68 63.52 129.676 63.52ZM136.436 43.656C133.108 43.656 129.884 49.636 129.468 51.508C131.288 51.664 138.1 49.48 138.1 45.632C138.1 44.592 137.58 43.656 136.436 43.656ZM165.476 32.216L162.044 54.264C161.836 55.564 162.46 55.564 163.292 54.472L179.204 33.308C180.608 31.488 180.556 29.928 179.1 29.928H177.488C177.02 29.928 176.864 29.772 176.968 29.304L177.176 28.42C177.228 28.108 177.384 28.004 177.852 28.004C178.528 28.004 180.296 28.16 183.468 28.16C186.432 28.16 187.784 28.004 188.46 28.004C188.98 28.004 189.084 28.264 189.032 28.524L188.824 29.408C188.72 29.772 188.616 29.928 188.356 29.928H186.796C184.924 29.928 183.156 31.8 181.388 34.036L158.82 63.156C158.508 63.572 157.936 64.04 157.312 64.04C156.636 64.04 156.376 63.364 156.532 62.22L160.796 32.788C161.056 31.176 160.588 29.928 158.508 29.928H156.896C156.48 29.928 156.22 29.824 156.272 29.564L156.584 28.524C156.688 28.16 156.688 28.004 157.156 28.004C157.832 28.004 160.068 28.16 163.812 28.16C167.608 28.16 169.74 28.004 170.364 28.004C170.884 28.004 170.988 28.16 170.936 28.42L170.728 29.512C170.676 29.824 170.572 29.928 170.156 29.928H168.492C166.62 29.928 165.736 30.552 165.476 32.216ZM184.863 63.52C184.343 63.468 183.979 63.052 183.979 62.22C183.979 61.024 184.863 58.632 187.047 52.808L188.555 48.752C189.075 47.348 189.491 46.308 189.491 45.684C189.491 45.216 189.179 45.008 188.763 45.008C187.879 45.008 185.435 47.816 184.603 48.648C184.395 48.856 184.187 48.856 184.031 48.7L183.615 48.232C183.407 48.076 183.303 47.972 183.459 47.764C183.667 47.452 188.971 41.212 192.299 41.368C192.923 41.368 193.547 41.784 193.547 42.668C193.547 43.604 192.715 45.944 191.779 48.44L188.763 56.344C188.035 58.268 187.827 59.412 187.827 59.776C187.827 60.244 187.983 60.556 188.399 60.66C189.491 60.452 192.299 57.488 192.559 57.02C192.663 56.864 192.871 56.864 193.131 57.124L193.547 57.488C193.755 57.748 193.807 57.852 193.651 58.112C193.339 58.528 189.179 63.52 184.863 63.52ZM193.235 34.4C190.947 34.4 190.531 32.476 190.531 31.904C190.531 30.5 191.623 29.304 193.235 29.304C195.055 29.304 195.991 30.604 195.991 31.8C195.991 32.58 195.367 34.4 193.235 34.4ZM199.221 63H197.193C196.621 63 196.517 62.896 196.621 62.532L200.313 52.912C201.561 49.688 203.017 45.944 203.017 45.06C203.017 44.54 202.809 44.176 202.237 44.176C201.249 44.176 198.753 46.672 197.869 47.66C197.713 47.816 197.557 47.816 197.349 47.608L196.881 47.14C196.673 46.932 196.621 46.828 196.777 46.62C197.557 45.684 201.405 41.368 205.149 41.368C206.345 41.368 206.813 42.252 206.813 42.928C206.813 44.54 204.577 49.48 204.161 50.676L204.369 50.78C205.929 48.284 211.597 41.368 216.225 41.368C217.785 41.368 218.825 42.148 218.825 43.5C218.825 45.788 217.629 48.492 215.913 52.704C214.509 56.136 213.261 59.048 213.261 59.88C213.261 60.192 213.469 60.556 213.885 60.556C214.665 60.556 216.953 58.632 217.629 57.904C217.837 57.748 218.045 57.8 218.201 58.008L218.565 58.424C218.773 58.632 218.825 58.736 218.617 58.996C217.993 59.828 213.781 63.52 210.297 63.52C209.621 63.52 209.049 63.26 209.049 62.48C209.049 61.492 210.921 57.384 212.533 52.912C213.261 50.884 215.133 46.568 215.133 45.424C215.133 44.696 214.769 44.228 213.833 44.228C211.805 44.228 206.657 49.012 204.369 52.704C203.433 54.212 202.601 55.564 201.249 59.204L199.949 62.688C199.845 62.896 199.741 63 199.221 63ZM221.61 59.828L228.162 44.696H224.522C224.21 44.696 224.106 44.592 224.21 44.28L224.626 43.136C224.73 42.876 224.886 42.772 225.198 42.772H228.942L231.646 36.74C231.906 36.22 232.062 36.116 232.478 35.96C233.05 35.804 234.402 35.284 234.818 35.076C235.13 34.92 235.39 34.764 235.598 34.764C235.91 34.764 236.014 35.076 235.65 35.804L232.218 42.772H237.522C237.782 42.772 237.886 42.928 237.73 43.344L237.262 44.436C237.21 44.592 237.002 44.696 236.794 44.696H231.49L226.446 56.396C225.822 57.852 225.25 59.152 225.25 59.724C225.25 60.296 225.458 60.608 225.926 60.608C227.434 60.608 230.814 57.644 231.126 57.28C231.282 57.072 231.438 57.124 231.594 57.28L232.166 57.904C232.322 58.06 232.322 58.164 232.218 58.372C231.542 59.204 226.706 63.52 222.702 63.52C221.402 63.52 221.038 63 221.038 62.272C221.038 61.492 221.298 60.608 221.61 59.828ZM254.724 41.368H256.544C256.752 41.368 256.804 41.628 256.7 41.836C255.712 43.968 253.06 51.144 252.8 51.976C252.488 52.86 250.304 59.308 250.304 59.776C250.304 60.244 250.564 60.4 250.876 60.4C251.5 60.4 254.152 57.696 254.516 57.228C254.672 57.072 254.828 56.968 254.932 57.124L255.4 57.644C255.556 57.8 255.608 57.904 255.504 58.06C254.932 59.1 250.408 63.52 247.444 63.52C246.82 63.52 246.352 63.312 246.352 62.636C246.352 61.856 246.872 60.244 248.848 54.732L248.588 54.628C246.404 57.956 241.152 63.52 237.46 63.52C236.264 63.52 234.652 62.532 234.652 60.192C234.652 52.6 243.18 41.368 249.524 41.368C251.708 41.368 252.696 42.304 253.216 43.136L254.204 41.732C254.36 41.524 254.516 41.368 254.724 41.368ZM239.852 60.764C242.452 60.764 249.056 52.34 249.992 50.416C250.72 48.908 251.24 47.608 251.24 46.1C251.24 44.696 250.72 43.032 248.796 43.032C244.012 43.032 238.448 54.004 238.448 58.944C238.448 60.14 238.968 60.764 239.852 60.764ZM262.944 78.444C257.536 78.444 252.284 75.376 252.284 71.632C252.284 67.784 258.524 65.236 261.072 64.144C259.564 63.052 259.096 62.116 259.096 61.128C259.096 60.14 260.032 59.256 263.516 57.28C262.112 56.916 259.46 55.044 259.46 51.3C259.46 47.4 262.892 41.368 268.664 41.368C271.264 41.368 272.616 43.032 273.084 43.812C273.656 43.24 275.58 41.888 277.504 41.888C279.22 41.888 279.688 43.292 279.688 43.916C279.688 44.488 279.324 45.528 278.024 45.528C277.036 45.528 276.62 45.112 276.308 44.748C276.048 44.488 275.632 44.384 275.32 44.384C274.852 44.384 274.02 44.748 273.812 45.112C274.02 45.632 274.228 47.244 274.228 48.024C274.228 50.52 272.772 56.344 266.792 57.384C265.856 57.54 265.388 57.644 265.232 57.748C264.244 58.164 262.528 59.36 262.528 60.244C262.528 60.816 263.048 61.388 263.412 61.648C264.296 62.272 266.792 63.832 270.172 66.068C273.188 68.044 274.02 69.76 274.02 71.684C274.02 72.516 273.136 78.444 262.944 78.444ZM255.872 71.268C255.872 74.856 260.5 76.832 263.984 76.832C267.52 76.832 270.484 75.584 270.484 72.672C270.484 70.384 268.3 68.98 267 68.096L262.424 65.132C258.16 66.848 255.872 68.824 255.872 71.268ZM265.232 56.188C269.028 56.188 270.9 49.896 270.9 46.152C270.9 43.76 269.964 42.668 268.56 42.668C265.44 42.668 262.788 48.752 262.788 52.652C262.788 54.992 263.672 56.188 265.232 56.188ZM282.743 63.52C279.363 63.52 277.907 61.856 277.907 58.424C277.907 54.056 280.767 48.596 284.563 44.852C286.227 43.188 289.035 41.368 291.531 41.368C293.559 41.368 294.495 42.876 294.495 44.124C294.495 46.672 292.571 49.376 289.659 50.884C286.851 52.288 284.043 52.86 282.119 53.016C281.859 53.64 281.443 55.356 281.443 57.8C281.443 60.14 283.159 61.076 284.147 61.076C286.695 61.076 288.983 59.152 290.075 57.384C290.179 57.228 290.335 57.124 290.543 57.332L291.115 57.8C291.375 57.956 291.375 58.112 291.167 58.268C289.867 60.088 286.747 63.52 282.743 63.52ZM289.503 43.656C286.175 43.656 282.951 49.636 282.535 51.508C284.355 51.664 291.167 49.48 291.167 45.632C291.167 44.592 290.647 43.656 289.503 43.656ZM292.506 69.604C292.246 69.604 291.986 69.708 291.882 69.136C291.83 68.616 292.038 68.512 292.454 68.408C293.754 68.044 296.614 66.328 296.614 63.936C296.614 62.688 296.198 62.168 295.366 61.284C295.106 61.024 293.91 60.192 293.91 58.944C293.91 57.696 294.742 56.552 296.198 56.552C298.59 56.552 299.942 59.776 299.942 61.596C299.942 67.732 293.494 69.604 292.506 69.604ZM106.034 109.348H96.778L89.498 118.5C88.406 119.904 87.366 121.256 87.366 121.984C87.366 122.764 88.042 123.232 89.186 123.232H91.058C91.318 123.232 91.526 123.336 91.422 123.752L91.214 124.74C91.162 125 91.058 125.156 90.694 125.156C90.174 125.156 87.938 125 83.882 125C80.45 125 78.63 125.156 78.058 125.156C77.798 125.156 77.538 125.052 77.59 124.792L77.85 123.648C77.902 123.336 78.006 123.232 78.214 123.232H78.994C81.23 123.232 83.414 121.672 85.286 119.436L109.362 90.68C109.622 90.316 109.83 90.212 110.818 90.16C111.546 90.108 112.742 89.952 113.262 89.796C113.834 89.64 114.562 89.38 114.978 89.38C115.394 89.38 115.602 89.536 115.498 89.9L107.854 118.76C107.646 119.644 107.334 120.944 107.334 121.776C107.334 122.608 108.218 123.232 109.258 123.232H110.662C110.974 123.232 111.13 123.388 111.078 123.752L110.922 124.688C110.87 125 110.766 125.156 110.298 125.156C109.674 125.156 107.594 125 104.058 125C100.418 125 98.806 125.156 97.974 125.156C97.506 125.156 97.402 124.948 97.454 124.636L97.662 123.648C97.714 123.44 97.818 123.232 98.078 123.232H99.066C101.042 123.232 102.394 122.868 103.434 118.968L106.034 109.348ZM98.13 107.528H106.606L110.61 93.8C110.818 93.072 109.882 92.968 109.466 93.436L98.13 107.528ZM116.377 118.396L125.477 94.944C126.257 92.968 126.205 91.668 124.697 91.668H123.189C122.825 91.668 122.773 91.46 122.877 91.2L123.189 90.264C123.293 89.952 123.397 89.9 123.709 89.9H130.157C130.625 89.9 130.781 90.212 130.625 90.68L119.809 118.188C119.341 119.384 118.093 122.244 119.185 122.244C120.017 122.244 122.409 120.216 123.033 119.54C123.241 119.332 123.345 119.384 123.501 119.54L124.073 120.164C124.177 120.268 124.229 120.476 124.021 120.684C123.761 121.1 118.925 125.52 115.597 125.52C114.921 125.52 114.453 125.208 114.453 124.012C114.453 123.232 115.753 119.956 116.377 118.396ZM128.02 118.396L137.12 94.944C137.9 92.968 137.848 91.668 136.34 91.668H134.832C134.468 91.668 134.416 91.46 134.52 91.2L134.832 90.264C134.936 89.952 135.04 89.9 135.352 89.9H141.8C142.268 89.9 142.424 90.212 142.268 90.68L131.452 118.188C130.984 119.384 129.736 122.244 130.828 122.244C131.66 122.244 134.052 120.216 134.676 119.54C134.884 119.332 134.988 119.384 135.144 119.54L135.716 120.164C135.82 120.268 135.872 120.476 135.664 120.684C135.404 121.1 130.568 125.52 127.24 125.52C126.564 125.52 126.096 125.208 126.096 124.012C126.096 123.232 127.396 119.956 128.02 118.396ZM156.866 120.476L158.582 112.78C158.738 112.052 158.478 110.44 158.322 109.972L152.706 93.904C152.29 92.708 151.354 91.928 149.534 91.928H148.338C148.026 91.928 147.922 91.824 147.974 91.512L148.182 90.42C148.234 90.056 148.338 90.004 148.702 90.004C149.378 90.004 150.73 90.16 154.162 90.16C158.114 90.16 159.882 90.004 160.558 90.004C160.922 90.004 161.078 90.108 161.026 90.42L160.922 91.512C160.87 91.824 160.766 91.928 160.454 91.928H159.102C157.126 91.928 157.022 93.228 157.438 94.424L162.274 108.88C162.482 109.556 162.69 109.556 163.054 109.088C164.198 107.528 172.05 96.348 172.622 94.736C173.298 92.76 172.778 91.928 170.698 91.928H169.658C169.346 91.928 169.242 91.72 169.294 91.408L169.398 90.42C169.45 90.056 169.554 90.004 170.022 90.004C170.75 90.004 172.778 90.16 175.742 90.16C178.602 90.16 180.162 90.004 180.838 90.004C181.306 90.004 181.41 90.16 181.358 90.42L181.202 91.408C181.15 91.824 181.046 91.928 180.786 91.928H179.798C178.03 91.928 177.094 92.76 175.742 94.476C175.014 95.412 165.498 108.776 164.77 109.816C163.626 111.428 163.106 112.104 162.586 114.444L161.286 120.32C160.714 122.972 161.598 123.232 163.314 123.232H164.874C165.186 123.232 165.29 123.388 165.238 123.648L165.082 124.74C165.03 125 164.926 125.156 164.51 125.156C163.73 125.156 162.066 125 158.218 125C153.902 125 152.29 125.156 151.718 125.156C151.406 125.156 151.25 125.052 151.302 124.74L151.51 123.648C151.51 123.388 151.614 123.232 151.978 123.232H153.486C155.93 123.232 156.502 122.036 156.866 120.476ZM177.574 125.52C174.714 125.52 172.218 122.764 172.218 118.812C172.218 112.26 177.158 103.368 184.074 103.368C187.558 103.368 189.638 105.916 189.638 109.452C189.638 115.172 185.114 125.52 177.574 125.52ZM176.794 123.024C182.202 123.024 187.558 112.104 187.558 108.672C187.61 107.06 186.674 105.76 184.958 105.76C182.774 105.76 180.018 107.736 177.418 111.948C175.65 114.756 174.402 117.928 174.402 120.372C174.402 122.036 175.546 123.024 176.794 123.024ZM211.19 103.888H213.322C213.79 103.888 213.894 104.044 213.79 104.356L209.786 115.172C208.278 119.228 207.602 121.62 207.602 121.932C207.602 122.4 207.654 122.4 208.018 122.556C208.798 122.556 211.658 119.956 212.074 119.332C212.178 119.176 212.386 119.124 212.542 119.332L213.062 119.852C213.218 120.008 213.218 120.112 213.062 120.32C212.906 120.528 208.07 125.52 204.482 125.52C203.754 125.52 203.494 124.948 203.494 124.324C203.494 123.7 206.146 117.2 206.822 115.432L206.51 115.276C204.326 118.448 198.814 125.52 193.666 125.52C192.626 125.52 191.794 124.636 191.742 123.388C191.794 121.724 193.406 118.5 195.434 113.664C196.786 110.44 197.982 107.996 197.982 107.06C197.982 106.592 197.618 106.332 197.15 106.332C196.214 106.332 193.614 108.672 193.094 109.296C192.938 109.452 192.782 109.452 192.626 109.296L192.158 108.828C192.002 108.724 192.002 108.568 192.21 108.36C192.574 107.892 196.89 103.368 200.218 103.368C201.258 103.368 201.726 104.408 201.726 105.24C201.726 106.54 200.478 109.608 198.346 114.236C196.942 117.304 195.59 120.632 195.59 121.776C195.59 122.348 195.954 122.66 196.474 122.66C199.23 122.66 204.742 115.848 206.25 113.664C207.238 112.208 208.07 110.804 208.642 109.244L210.462 104.252C210.566 103.94 210.826 103.888 211.19 103.888ZM217.814 125H215.734C215.37 125 215.162 124.792 215.266 124.532L218.178 116.108C219.114 113.196 220.726 107.736 220.726 107.008C220.726 106.54 220.31 106.228 219.842 106.228C218.802 106.228 216.462 108.568 215.734 109.452C215.63 109.608 215.422 109.556 215.318 109.452L214.798 108.932C214.694 108.828 214.694 108.672 214.798 108.516C215.89 106.904 219.01 103.368 222.546 103.368C223.586 103.368 224.002 104.252 224.002 105.188C224.054 106.176 223.17 109.088 222.13 112.572L222.39 112.676C223.794 109.764 227.954 103.368 230.866 103.368C232.374 103.368 233.31 104.304 233.31 105.708C233.31 107.06 232.27 108.1 231.282 108.1C230.814 108.1 230.398 107.996 229.982 107.58C229.566 107.164 229.306 106.956 228.63 106.956C227.226 106.956 224.314 111.428 222.234 114.86C221.61 115.848 220.986 117.044 220.206 119.384L218.49 124.636C218.386 125 218.23 125 217.814 125ZM234.737 125.52C231.721 125.52 229.849 124.324 229.849 122.608C229.849 121.88 230.525 120.892 231.617 120.892C232.761 120.892 233.437 121.672 233.749 122.556C234.061 123.44 234.321 124.012 235.621 124.012C237.129 124.012 238.533 122.66 238.533 120.84C238.533 118.604 236.973 116.472 236.297 114.808C235.933 113.924 234.737 112.104 234.789 109.712C234.789 106.696 237.649 103.368 241.341 103.368C242.901 103.368 245.033 103.992 245.033 106.02C245.033 106.956 244.201 107.684 243.421 107.684C242.797 107.684 242.017 107.32 241.653 106.436C241.393 105.812 241.341 104.98 240.301 104.98C239.261 104.98 237.753 106.384 237.753 108.256C237.753 110.18 239.313 112.364 239.625 113.092C239.937 113.716 241.601 116.264 241.601 119.02C241.601 123.076 238.325 125.52 234.737 125.52Z" fill="#48110C"/>
+            </svg>
+        </div>
+
+        <!-- Persistent Search Form - Index -->
+        <div class="persistent-searchbar-wrapper-index" style="margin-bottom: 1rem;">
+            <form id="persistent-search-form" method="GET" class="flex items-center searchbar" action="/browse/">
+                
+                <div class="search-icon" style="padding-left:.25rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="21" viewBox="0 0 21 21" fill="none">
+                        <path d="M7.50837 14.3092C11.115 14.3092 14.0387 11.3855 14.0387 7.77887C14.0387 4.17227 11.115 1.24854 7.50837 1.24854C3.90176 1.24854 0.978027 4.17227 0.978027 7.77887C0.978027 11.3855 3.90176 14.3092 7.50837 14.3092Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12.1143 12.375L19.7257 19.9958" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <input type="text" id="persistent-opensearch-input" name="query" class="w-full text-md pl-3" placeholder="Search items..." style="border: none; margin: 0; padding: 0 .5rem;">
+                <a href="#" class="inset-y-0 flex items-center" id="persistent-reset-search" style="display: none;">
+                    <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+                    </svg>
+                </a>
+            </form>
+        </div>
+
+        <!-- CURATED FILTERS -->
+        <div class="curated-filters-container" style="margin-bottom: 4rem;">
+            <button class="curated-filter-btn linen" data-filter="linen">
+                Linen
+            </button>
+            <button class="curated-filter-btn vacation" data-filter="vacation">
+                Vacation
+            </button>
+            <button class="curated-filter-btn date-night" data-filter="date_night">
+                Date Night
+            </button>
+            <button class="curated-filter-btn designer" data-filter="designer">
+                Designer
+            </button>
+            <button class="curated-filter-btn wedding-guest" data-filter="wedding_guest">
+                Wedding Guest
+            </button>
+        </div>
+
+    </div>
+
+
+    <!-- Featured Items Section using Django Template -->
+    {% if featured_items %}
+    <div id="featured-section" style="background-color: #BA9176;">
+        <div class="title" style="text-align: center; padding: 0 0 3rem 0;">
+            <p class="AdobeCaslonProItalic" style="font-size: 3rem; letter-spacing: -0.05rem;">Featured Finds</p>
+            <p class="AdobeCaslonProRegular">Editor's pick</p>
+        </div>
+        
+        <div class="featured-items-container">
+            <div class="featured-items-wrapper">
+                {% for item in featured_items %}
+                <div class="featured-item">
+                    <a href="/browse/{{ item.gallery_url|slice:'12:-5' }}" style="position: relative; display: block;">
+                        <img src="https://finde-media.s3.amazonaws.com/{{ item.gallery_url }}" 
+                            alt="{{ item.title }}" 
+                            class="item-image"
+                            loading="eager">
+                        <div class="overlay">
+                            {% if item.availability %}
+                                <button class="overlay-button" onclick="window.open('{{ item.item_web_url }}', '_blank'); return false;">Visit</button>
+                            {% else %}
+                                <button class="overlay-button sold-out" disabled>Sold Out</button>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+                
+                <!-- See All Item -->
+                <div class="featured-item see-all-item">
+                    <a href="/browse/" style="position: relative; display: block; height: 100%; text-decoration: none;">
+                        <div class="see-all-content">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                            <p class="caption1-regular">Browse All</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Navigation Arrow (mobile only) -->
+            <button class="carousel-nav-arrow" onclick="scrollCarousel()" aria-label="Next item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <!-- Designer Items Section -->
+    {% if designer_items %}
+    <div id="designer-section" style="background-color: #F1EADC; ">
+        <div class="title" style="text-align: center; padding: 0 0 3rem 0;">
+            <p class="AdobeCaslonProItalic" style="font-size: 3rem; letter-spacing: -0.05rem;">Designer Finds</p>
+            <p class="AdobeCaslonProRegular">Archival & collectible pieces</p>
+        </div>
+        
+        <div class="featured-items-container">
+            <div class="featured-items-wrapper designer-items-wrapper">
+                {% for item in designer_items %}
+                <div class="featured-item">
+                    <a href="/browse/{{ item.gallery_url|slice:'12:-5' }}" style="position: relative; display: block;">
+                        <img src="https://finde-media.s3.amazonaws.com/{{ item.gallery_url }}" 
+                            alt="{{ item.title }}" 
+                            class="item-image"
+                            loading="lazy">
+                        <div class="overlay">
+                            {% if item.availability %}
+                                <button class="overlay-button" onclick="window.open('{{ item.item_web_url }}', '_blank'); return false;">Visit</button>
+                            {% else %}
+                                <button class="overlay-button sold-out" disabled>Sold Out</button>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+                
+                <!-- See All Designer Items -->
+                <div class="featured-item see-all-item">
+                    <a href="{{ designer_filter_url }}" style="position: relative; display: block; height: 100%; text-decoration: none;">
+                        <div class="see-all-content">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                            <p class="caption1-regular">Browse Designer</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Navigation Arrow (mobile only) -->
+            <button class="carousel-nav-arrow designer-nav-arrow" onclick="scrollDesignerCarousel()" aria-label="Next designer item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+    
+
+    <!-- Under the Radar Section -->
+    {% if under_radar_items %}
+    <div id="under-radar-section" style="background-color: #BA9176; padding-bottom: 7rem !important;">
+        <div class="title" style="text-align: center; padding: 0 0 3rem 0;">
+            <p class="AdobeCaslonProItalic" style="font-size: 3rem; letter-spacing: -0.05rem;">Under the Radar</p>
+            <p class="AdobeCaslonProRegular">Latest finds under $100</p>
+        </div>
+        
+        <div class="featured-items-container">
+            <div class="featured-items-wrapper under-radar-items-wrapper">
+                {% for item in under_radar_items %}
+                <div class="featured-item">
+                    <a href="/browse/{{ item.gallery_url|slice:'12:-5' }}" style="position: relative; display: block;">
+                        <img src="https://finde-media.s3.amazonaws.com/{{ item.gallery_url }}" 
+                            alt="{{ item.title }}" 
+                            class="item-image"
+                            loading="lazy">
+                        <div class="overlay">
+                            {% if item.availability %}
+                                <button class="overlay-button" onclick="window.open('{{ item.item_web_url }}', '_blank'); return false;">Visit</button>
+                            {% else %}
+                                <button class="overlay-button sold-out" disabled>Sold Out</button>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+                
+                <!-- See All Under the Radar Items -->
+                <div class="featured-item see-all-item">
+                    <a href="{{ under_radar_filter_url }}" style="position: relative; display: block; height: 100%; text-decoration: none;">
+                        <div class="see-all-content">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                            <p class="caption1-regular" style="opacity: .75;">Browse Under $100</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Navigation Arrow (mobile only) -->
+            <button class="carousel-nav-arrow under-radar-nav-arrow" onclick="scrollUnderRadarCarousel()" aria-label="Next under the radar item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        
+        <div class="items-center justify-center" style="left: 2rem; position: relative; padding: 6.5rem 0rem 0rem 0rem; margin: auto; text-align:center; ">
+            <a href="/browse">
+                <button class="browse-btn">Browse Latest Finds</button>
+            </a>
+        </div>
+
+    </div>
+    {% endif %}
+
+
+
+
+    <!-- Email Signup -->
+   <div style="max-width: 1000px; margin: 0 auto; padding: 7rem 2rem 1rem 2rem;">
+
+        <div style="justify-content: center; align-items: baseline; padding-bottom: 6rem;">
+            <p style="text-align: center; right: 0 !important;" class="AdobeCaslonProItalic title">
+                Weekly Vintage<br>Trend Report
+            </p>
+
+            <div style="max-width: 560px; margin: auto;">
+                <p style="text-align: center;" class="AdobeCaslonProRegular">
+                    Spot trends faster. First access to weekly trend insights.
+                    Real sales data. Curating finds from 100+ sellers daily. 
+                </p>
+            </div>
+
+            <!-- Email Signup -->
+            <div class="w-full md:w-2/6 flex flex-col items-center justify-center" style="padding-bottom: 6.5rem; margin: auto; text-align:center; ">
+                <form method="post" action="{% url 'capture_email' %}" class="w-full flex flex-col items-center">
+                    {% csrf_token %}
+                    <input type="email" name="email" placeholder="Enter your email" 
+                    class="mb-2 w-full max-w-xs border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-[#0073ff] focus:border-[#0073ff] transition"
+                    style="border-radius: 9999px !important; padding: .5rem 1rem !important; margin-bottom: .75rem !important;">
+                    
+                    <!-- Newsletter Checkbox -->
+                    <div class="mb-4 flex items-center" style="margin-bottom: 1.5rem;">
+                        <input type="checkbox" id="newsletter_trend" name="newsletter_trend" value="yes" checked
+                        class="mr-2 h-4 w-4 text-[#0073ff] border-gray-300 rounded focus:ring-[#0073ff]">
+                        <label for="newsletter_trend" class="text-sm">Weekly Trend Report</label>
+                    </div>
+                    
+                    <button type="submit" class="button-dark mb-2">Subscribe</button>
+                    {% if messages %}
+                    <ul class="text-center">
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </form>
+            </div>
+
+
+        </div>
+    </div>
+        
+
+
+</div>
+
+<a href="/browse/" class="AnturaScript" style="font-size: 11.5vw; display: block; text-align: center; letter-spacing: 0rem !important; margin-right: 0 !important; padding-right: 0 !important;">Finde.Clothing</a>
+    
+
+<script>
+function scrollCarousel() {
+    const wrapper = document.querySelector('.featured-items-wrapper');
+    const items = wrapper.querySelectorAll('.featured-item');
+    
+    const itemWidth = items[0].offsetWidth;
+    const gap = 16; // 1rem gap
+    
+    // Calculate scroll amount
+    const scrollAmount = itemWidth + gap;
+    
+    // Check if we're at the end
+    const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+    const currentScroll = wrapper.scrollLeft;
+    
+    if (currentScroll >= maxScroll - 10) {
+        // Scroll back to start
+        wrapper.scrollTo({ 
+            left: 0, 
+            behavior: 'smooth' 
+        });
+    } else {
+        // Scroll to next item
+        wrapper.scrollTo({ 
+            left: currentScroll + scrollAmount, 
+            behavior: 'smooth' 
+        });
+    }
+}
+
+</script>
+
+<script>
+// ============================
+// CURATED FILTER LOGIC FOR INDEX PAGE
+// ============================
+
+
+function initializeCuratedFiltersForIndex() {
+    
+    // Find all curated filter buttons on index page
+    const curatedButtons = document.querySelectorAll('.curated-filter-btn');
+    
+    // Add click listeners to all curated filter buttons
+    curatedButtons.forEach(button => {
+        const filterName = button.getAttribute('data-filter');
+        
+        // Remove any existing listeners to prevent duplicates
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.querySelector(`.curated-filter-btn[data-filter="${filterName}"]`);
+        
+        if (CURATED_FILTERS[filterName]) {
+            newButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('🖱️ Curated filter clicked:', filterName);
+                
+                // Call the redirect function with the filter name
+                redirectToBrowseWithCuratedFilter(filterName);
+            });
+        } else {
+            console.warn('⚠️ No config found for filter:', filterName);
+        }
+    });
+}
+
+function getUserSearchQuery() {
+
+    // Try multiple methods to find the search input
+    const searchSelectors = [
+        '#persistent-opensearch-input',
+        '#opensearch-input',
+        'input[name="query"]',
+        '.persistent-searchbar-wrapper-index input[type="text"]',
+        '#persistent-search-form input[type="text"]'
+    ];
+    
+    let userQuery = '';
+    
+    for (const selector of searchSelectors) {
+        const input = document.querySelector(selector);
+        if (input && input.value && input.value.trim()) {
+            userQuery = input.value.trim();
+            break;
+        }
+    }
+    
+    return userQuery;
+}
+
+function redirectToBrowseWithCuratedFilter(filterName) {
+    
+    const config = CURATED_FILTERS[filterName];
+    
+    // Get user's search input
+    const userQuery = getUserSearchQuery();
+    
+    // Build curated search terms
+    const curatedTerms = [];
+    
+    // Add keywords
+    if (config.keywords && Array.isArray(config.keywords)) {
+        curatedTerms.push(...config.keywords);
+    }
+    
+    // Add materials
+    if (config.materials && Array.isArray(config.materials)) {
+        curatedTerms.push(...config.materials);
+    }
+    
+    // Add brands
+    if (config.brands && Array.isArray(config.brands)) {
+        curatedTerms.push(...config.brands);
+    }
+    
+    // Remove duplicates from curated terms
+    const uniqueCuratedTerms = [...new Set(curatedTerms)];
+    const curatedQuery = uniqueCuratedTerms.join(' ');
+    
+    // Combine user query with curated query
+    let finalQuery = '';
+    if (userQuery && curatedQuery) {
+        // User query comes first, then curated terms
+        finalQuery = `${userQuery} ${curatedQuery}`;
+    } else if (userQuery) {
+        finalQuery = userQuery;
+    } else if (curatedQuery) {
+        finalQuery = curatedQuery;
+    }
+    
+    // Extract categories
+    let curatedCategories = [];
+    if (config.categories) {
+        Object.values(config.categories).forEach(categoryList => {
+            if (Array.isArray(categoryList)) {
+                curatedCategories.push(...categoryList);
+            }
+        });
+    }
+    curatedCategories = [...new Set(curatedCategories)];
+    
+    // Extract colors
+    let curatedColors = [];
+    if (config.colors && Array.isArray(config.colors)) {
+        curatedColors = config.colors.map(color => color.toLowerCase());
+    }
+    curatedColors = [...new Set(curatedColors)];
+    
+    // Build URL parameters
+    const urlParams = new URLSearchParams();
+    
+    // Add curated filter identifier
+    urlParams.set('curated_filter', filterName);
+    
+    // Add combined query (user keywords + curated terms)
+    if (finalQuery) {
+        urlParams.set('query', finalQuery);
+    }
+    
+    // Preserve original user input separately for display purposes
+    if (userQuery) {
+        urlParams.set('user_query', userQuery);
+    }
+    
+    // Add categories
+    if (curatedCategories.length > 0) {
+        curatedCategories.forEach(category => {
+            urlParams.append('categoryId', category);
+        });
+    }
+    
+    // Add colors
+    if (curatedColors.length > 0) {
+        curatedColors.forEach(color => {
+            urlParams.append('color', color);
+        });
+    }
+    
+    // Set default sort and page
+    urlParams.set('sort_by', 'newlyAdded');
+    urlParams.set('page', '1');
+    
+    // Build final URL
+    const browseUrl = `/browse/?${urlParams.toString()}`;
+
+    // Redirect to browse page
+    window.location.href = browseUrl;
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Use setTimeout to ensure all scripts are loaded
+    setTimeout(() => {
+        initializeCuratedFiltersForIndex();
+        
+     
+    }, 100);
+});
+
+
+
+
+</script>
+
+{{ curated_filters|json_script:"curated-filters-data" }}
+<script>
+    window.CURATED_FILTERS = JSON.parse(document.getElementById('curated-filters-data').textContent);
+    window.HASHED_BROWSE_PATH = "{% static 'js/browse.js' %}";
+</script>
+
+
+{% endblock %}

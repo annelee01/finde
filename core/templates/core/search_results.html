@@ -1,0 +1,878 @@
+{% extends 'core/base.html' %}
+
+{% block title %}eBay Search Results{% endblock %}
+
+{% load custom_tags %}
+    
+{% load static %}
+
+{% load humanize %}
+
+{% block content %}
+<style>
+    .search-container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+    }
+    
+    .search-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .category-select {
+        padding: 10px 12px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 16px;
+        background-color: white;
+        max-width: 100%;
+    }
+    
+
+    /* Autocomplete styles */
+    .autocomplete-container {
+        position: relative;
+    }
+    
+    .autocomplete-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .autocomplete-input:focus {
+        outline: none;
+        border-color: #007bff;
+    }
+    
+    .autocomplete-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 0 0 6px 6px;
+        max-height: 240px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .autocomplete-item {
+        padding: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .autocomplete-item:hover,
+    .autocomplete-item.highlighted {
+        background-color: #f8f9fa;
+    }
+    
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    
+    /* Hide datalist arrow on some browsers */
+    input[list]::-webkit-calendar-picker-indicator {
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            flex-direction: column;
+        }
+        
+        .form-group {
+            min-width: 100%;
+        }
+    }
+
+
+
+
+/* Tab styles */
+.tab-container {
+    margin-bottom: 2rem;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 2rem;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    color: #374151;
+}
+
+.tab-button.active {
+    color: #1f2937;
+    border-bottom-color: #3b82f6;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Status badge styles */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    margin-left: 0.5rem;
+}
+
+.badge-in-stock {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-ended {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-sold {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+
+</style>
+    
+    <h1>BROWSE eBay Search Results</h1>
+    
+    <div class="search-container">
+        <!-- Error for no existing username -->
+        {% if username_error %}
+            <div class="alert alert-error" style="background-color: #fee; border: 1px solid #fcc; color: #c66; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <strong>⚠️ Username Error:</strong> {{ username_error }}
+            </div>
+        {% endif %}
+
+        <form method="GET" action="{% url 'search_results' %}" class="search-form">
+            {% csrf_token %}
+            
+            <!-- Quick Save Section -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="quick_item_id">Quick Save Item ID</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" 
+                            id="quick_item_id"
+                            placeholder="Enter eBay item ID (e.g. 146645065185)" 
+                            class="autocomplete-input"
+                            style="flex: 1; margin-bottom: 0 !important;">
+                        <button type="button" id="quick-save-button" class="button-dark" style="margin: 0;">
+                            Quick Save
+                        </button>
+                    </div>
+                    <span class="caption1-regular">Enter plain item ID number (no formatting)</span>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid #ddd; margin: 8px 0;"></div>
+
+            <!-- Top row: Keywords -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="query">Keywords</label>
+                    <input type="text" 
+                           name="query" 
+                           id="query"
+                           value="{{ request.GET.query }}" 
+                           placeholder="Enter keywords (e.g., vintage dress, nike shoes)" 
+                           class="autocomplete-input"
+                           style="margin-bottom: 0 !important;">
+                    <span class="caption1-regular">Search for item titles, descriptions, or brands</span>
+                </div>
+            </div>
+
+            <!-- Second row: Username and Category -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">eBay Username</label>
+                    <div class="autocomplete-container">
+                        <input type="text" 
+                               name="username" 
+                               id="username"
+                               value="{{ request.GET.username }}" 
+                               placeholder="Type or select username..."
+                               class="autocomplete-input"
+                               autocomplete="off"
+                               style="margin-bottom: 0 !important;">
+                     
+                        <div class="autocomplete-dropdown" id="username-dropdown" style="display: none;">
+                            {% for saved_username in saved_usernames %}
+                                <div class="autocomplete-item" data-value="{{ saved_username }}">
+                                    {{ saved_username }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <span class="caption1-regular">Search & save usernames. *Search keyword required*</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category_id">Category</label>
+                    <select name="category_id" id="category_id" class="category-select">
+                        <option value="">All Categories</option>
+                        <optgroup label="Vintage">
+                            <option value="182047" {% if request.GET.category_id == '182047' %}selected{% endif %}>
+                                Clothing (Women's)
+                            </option>
+                            <option value="74976" {% if request.GET.category_id == '74976' %}selected{% endif %}>
+                                Shoes (Women's)
+                            </option>
+                            <option value="262024" {% if request.GET.category_id == '262024' %}selected{% endif %}>
+                                Jewelry
+                            </option>
+                            <option value="182059" {% if request.GET.category_id == '182059' %}selected{% endif %}>
+                                Bags, Hats & Accessories
+                            </option>
+                            <option value="74969" {% if request.GET.category_id == '74969' %}selected{% endif %}>
+                                Hats (women's)
+                            </option> 
+                        </optgroup>
+                        <optgroup label="Modern">
+                            <option value="260010" {% if request.GET.category_id == '260010' %}selected{% endif %}>
+                                Clothing, Shoes & Accessories (Women's)
+                            </option>
+                            <option value="281" {% if request.GET.category_id == '281' %}selected{% endif %}>
+                                Jewelry & Watches
+                            </option>
+                        </optgroup>
+                    </select>
+                    <span class="caption1-regular">Filter by specific categories</span>
+                </div>
+            </div>
+            
+            <!-- Search Button -->
+            <div class="form-row">
+                <button type="submit" name="search-form" class="button-dark">
+                    Search Items
+                </button>
+            </div>
+           
+        </form>
+    </div>
+
+    <div class="pagination pb-6" style="padding-top: 0 !important;">
+        <!-- Pagination controls will be dynamically inserted here by JavaScript -->
+    </div>
+
+    <ul id="paginated-list" data-current-page="1" aria-live="polite">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8" style="text-align: left; padding-bottom:6rem;">
+            {% if search_results %}
+                {% for item in search_results %}
+                    <div class="item-container" data-itemid="{{ item.itemId }}" data-title="{{ item.title }}" data-price="{{ item.price }}" data-categories="{{ item.categories }}" data-affiliatelink="{{ item.itemAffiliateWebUrl }}">
+                        {% if item.image.imageUrl %}
+                            <img src="{{ item.image.imageUrl }}" alt="{{ item.title }}" style="border-radius: .8rem;">
+                        {% else %}
+                            <div class="no-image-placeholder" style="width: 100%; height: 150px; background-color: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 0.8rem; display: flex; align-items: center; justify-content: center; color: #999; font-size: 14px;">
+                                No Image Available
+                            </div>
+                        {% endif %}
+                        <a href="{{ item.itemAffiliateWebUrl }}" target="_blank" style="position: relative; height: 10px !important;"> 
+                            <div class="item-title">{{ item.title }}</div>
+                            <div class="item-price">${{ item.price.value|floatformat:2|intcomma }}</div>
+                        </a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No items found. Try a different search term.</p>
+            {% endif %}
+        </div>
+    </ul>
+    
+
+    
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+        <div class="tabs">
+            <button class="tab-button active" data-tab="in-stock">
+                In Stock
+                <span class="status-badge badge-in-stock">{{ in_stock_count|default:0 }}</span>
+            </button>
+            <button class="tab-button" data-tab="ended">
+                Ended
+                <span class="status-badge badge-ended">{{ ended_count|default:0 }}</span>
+            </button>
+            <button class="tab-button" data-tab="sold-main">
+                Sold (Main DB)
+                <span class="status-badge badge-sold">{{ sold_main_count|default:0 }}</span>
+            </button>
+            <button class="tab-button" data-tab="sold-archive">
+                Sold (Archive)
+                <span class="status-badge badge-sold">{{ sold_archive_count|default:0 }}</span>
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content active" id="in-stock">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {% for item in db_items %}
+                    {% if item.availability == 'IN_STOCK' %}
+                    <div class="item-container">
+                        <div class="published-item-container" data-itemid="{{ item.item_id }}" data-color="{{ item.color }}" data-categoryid="{{ item.categoryId }}" data-featured="{{ item.featured|yesno:'true,false' }}">
+                            <div class="flex flex-col items-center">
+                                <img src="{{ MEDIA_URL }}{{ item.gallery_url }}" alt="{{ item.title }}" class="mb-2" draggable="false" style="border-radius: .8rem; height:200px; object-fit: cover; max-height:200px; min-width:150px;">
+                                
+                                <span class="color-swatch {{ item.color|lower }} h-3 aspect-square" title="{{ item.color }}"></span>
+
+                                <!-- Item ID and Edit Icon Container -->
+                                <div class="flex items-center gap-2 mb-1">
+                                    <a href="{{ item.item_web_url }}" target="_blank"> 
+                                        <div class="item-id" style="font-size: 12px;">{{ item.item_id }}</div>
+                                    </a>
+                                    <!-- Edit Icon -->
+                                    <button class="edit-item-btn p-1 bg-gray-100 hover:bg-gray-200 rounded-full shadow-sm transition-all duration-200" data-item-id="{{ item.item_id }}">
+                                        <svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p style="font-style:italic; font-size: 12px; text-align: center;">
+                                ${{ item.price }} – {{ item.brand }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <p>No items found.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tab-content" id="ended">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {% for item in db_items %}
+                    {% if item.availability == 'ENDED' %}
+                        <div class="item-container" data-itemid="{{ item.item_id }}">
+                            <div class="flex flex-col items-center" style="font-size: 12px; text-align:center;">
+                                <img src="{{ MEDIA_URL }}{{ item.gallery_url }}" alt="{{ item.title }}" class="mb-2" draggable="false" style="border-radius: .8rem; height:200px; object-fit: cover; max-height:200px; min-width:150px;">
+                                <a href="{{ item.item_web_url }}" target="_blank"> 
+                                    {{ item.username }}
+                                    <br>
+                                    {{ item.item_id }}
+                                </a>
+                                <p style="font-style:italic; font-size: 12px;">{{ item.title }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <p>No items found.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tab-content" id="sold-main">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {% for item in db_items %}
+                    {% if item.availability == 'OUT_OF_STOCK' %}
+                        <div class="item-container" data-itemid="{{ item.item_id }}">
+                            <img src="{{ MEDIA_URL }}{{ item.gallery_url }}" alt="{{ item.title }}" class="mb-2" draggable="false" style="border-radius: .8rem; height:200px; object-fit: cover; max-height:200px; min-width:150px;">
+                            <a href="{{ item.item_web_url }}" target="_blank"> 
+                                {{ item.username }}
+                                <br>
+                                <span style="font-style:italic; font-size: 12px;">{{ item.item_id }}</span>
+                            </a>
+                            <br>
+                            <div style="font-style:italic; font-size: 12px;">${{ item.price }}<br>Sold {{ item.sold_day }}</div>
+                            <p style="font-style:italic; font-size: 12px;">{{ item.title }}</p>      
+                            <p style="font-style:italic; font-size: 12px;">{{ item.material }}</p>                         
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tab-content" id="sold-archive">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {% for item in db_items_sold %}
+                    <div class="item-container">
+                        <div class="sold-item-container" data-itemid="{{ item.item_id }}" style="text-align:center;">
+                            <div class="flex flex-col items-center">
+                                <img src="{{ MEDIA_URL }}{{ item.gallery_url }}" alt="{{ item.title }}" class="mb-2" draggable="false" style="border-radius: .8rem; height:200px; object-fit: cover; max-height:200px; min-width:150px;">
+                                <a href="{{ item.item_web_url }}" target="_blank"> 
+                                    <div class="item-id">{{ item.item_id }}</div>
+                                </a>
+                                <div style="font-style:italic; font-size: 12px;">{{ item.brand }}</div>
+                                <div style="font-style:italic; font-size: 12px;">${{ item.price }}</div>
+                                <div style="font-style:italic; font-size: 12px;">Sold {{ item.sold_day }}</div>
+                                <div style="font-style:italic; font-size: 12px;">{{ item.title }}</div>
+                                <p style="font-style:italic; font-size: 12px;">{{ item.material }}</p>   
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>No items found in 'core_ebayitem_out_of_stock' database.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+            
+       
+
+            <!-- Edit Item Popup Overlay -->
+            <div id="edit-item-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Edit Item</h3>
+                        <button id="close-edit-popup" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <form id="edit-item-form" class="space-y-4">
+                        <!-- Category Dropdown -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select id="popup-category-dropdown" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                {% for category_info in category_names %}
+                                    <option value="{{ category_info.id }}">{{ category_info.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Color Dropdown -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                            <select id="popup-color-dropdown" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Color</option>
+                                {% for color in distinct_colors %}
+                                    <option value="{{ color }}" {% if color == item.color %} selected {% endif %}>
+                                        {{ color|title }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Featured Toggle - ADD THIS -->
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" id="popup-featured-checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-700">Featured Item</span>
+                            </label>
+                            <p class="text-xs text-gray-500 mt-1">Featured items appear at the top of search results</p>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <div class="flex gap-3 pt-4">
+                            <button type="button" id="save-item-changes" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                Save Changes
+                            </button>
+                            <button type="button" id="cancel-edit" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                        
+                        <input type="hidden" id="popup-item-id" value="">
+                    </form>
+                    
+                    <div id="popup-update-message" class="hidden mt-3 p-2 bg-green-100 text-green-700 rounded-md text-sm">
+                        Item updated successfully
+                    </div>
+                </div>
+            </div>
+            
+        </div>   
+    </div>
+    
+    
+
+
+<div class="search-result-buttons mx-auto">
+    <button type="button"id="publish-button" class="button-light bg-teal-500 hover-bg-teal-700">Publish</button>
+    <button type="button" id="remove-button" class="button-light bg-red-500 hover-bg-red-700">Remove</button>
+    <button type="button" id="update-availability-button" class="button-light bg-blue-500 hover-bg-blue-700">1. Update Availability</button>
+    <button type="button" id="get-ended-items" class="button-light bg-blue-500 hover-bg-blue-700">2. Relist Items</button>
+    <button type="button" id="manual-relist" class="button-light bg-blue-500 hover-bg-blue-700">3. Manual Relist Items</button>
+</div>
+
+
+<!-- JavaScript for tab functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetTab = button.getAttribute('data-tab');
+
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked button and corresponding content
+            button.classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
+        });
+    });
+});
+</script>
+
+<script>
+// Username autocomplete dropdown functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('username');
+    const dropdown = document.getElementById('username-dropdown');
+    
+    if (input && dropdown) {
+        const items = dropdown.querySelectorAll('.autocomplete-item');
+        let currentFocus = -1;
+        
+        // Show dropdown when input is focused and has content or is empty
+        input.addEventListener('focus', function() {
+            if (items.length > 0) {
+                filterItems();
+                dropdown.style.display = 'block';
+            }
+        });
+        
+        // Filter items as user types
+        input.addEventListener('input', function() {
+            filterItems();
+            currentFocus = -1;
+        });
+        
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.autocomplete-container')) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // Handle keyboard navigation
+        input.addEventListener('keydown', function(e) {
+            const visibleItems = dropdown.querySelectorAll('.autocomplete-item:not([style*="display: none"])');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentFocus++;
+                if (currentFocus >= visibleItems.length) currentFocus = 0;
+                highlightItem(visibleItems);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentFocus--;
+                if (currentFocus < 0) currentFocus = visibleItems.length - 1;
+                highlightItem(visibleItems);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentFocus > -1 && visibleItems[currentFocus]) {
+                    selectItem(visibleItems[currentFocus]);
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.style.display = 'none';
+                currentFocus = -1;
+            }
+        });
+        
+        // Handle item clicks
+        items.forEach(item => {
+            item.addEventListener('click', function() {
+                selectItem(this);
+            });
+        });
+        
+        function filterItems() {
+            const query = input.value.toLowerCase();
+            let hasVisible = false;
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    item.style.display = 'block';
+                    hasVisible = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            dropdown.style.display = hasVisible ? 'block' : 'none';
+        }
+        
+        function highlightItem(visibleItems) {
+            // Remove previous highlights
+            items.forEach(item => item.classList.remove('highlighted'));
+            
+            // Add highlight to current item
+            if (currentFocus > -1 && visibleItems[currentFocus]) {
+                visibleItems[currentFocus].classList.add('highlighted');
+            }
+        }
+        
+        function selectItem(item) {
+            input.value = item.dataset.value;
+            dropdown.style.display = 'none';
+            currentFocus = -1;
+            input.focus();
+        }
+    }
+});
+</script>
+
+<script>
+// Quick save item functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const quickSaveButton = document.getElementById('quick-save-button');
+    const quickItemIdInput = document.getElementById('quick_item_id');
+    
+    if (quickSaveButton && quickItemIdInput) {
+        quickSaveButton.addEventListener('click', function() {
+            const itemId = quickItemIdInput.value.trim();
+            
+            if (!itemId) {
+                alert('Please enter an item ID');
+                return;
+            }
+            
+            // Validate it's a number
+            if (!/^\d+$/.test(itemId)) {
+                alert('Item ID should contain only numbers');
+                return;
+            }
+            
+            // Show loading state
+            const originalText = quickSaveButton.innerHTML;
+            quickSaveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+            quickSaveButton.disabled = true;
+            
+            // Use the existing search functionality by simulating a search for this specific item
+            const searchUrl = new URL(window.location.href.split('?')[0]);
+            searchUrl.searchParams.set('query', itemId);
+            searchUrl.searchParams.set('search-form', '');
+            
+            // Navigate to search with the item ID
+            fetch(searchUrl.toString())
+                .then(response => response.text())
+                .then(html => {
+                    // Parse the HTML response to extract item data
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Look for search results in the response
+                    const itemContainers = doc.querySelectorAll('.item-container[data-itemid]');
+                    let foundItem = null;
+                    
+                    // Look for an item that matches our ID (might be formatted as v1|ID|0)
+                    itemContainers.forEach(container => {
+                        const dataItemId = container.getAttribute('data-itemid');
+                        if (dataItemId && dataItemId.includes(itemId)) {
+                            foundItem = {
+                                itemId: dataItemId,
+                                title: container.getAttribute('data-title') || 'Unknown Title',
+                                price: container.getAttribute('data-price') || '0.00',
+                                categories: container.getAttribute('data-categories') || '',
+                                itemAffiliateWebUrl: container.getAttribute('data-affiliatelink') || ''
+                            };
+                        }
+                    });
+                    
+                    if (foundItem) {
+                        // Found the item; save it using the existing save endpoint
+                        return fetch('/save-items/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify([foundItem])
+                        });
+                    } else {
+                        throw new Error(`Item ${itemId} not found. Please check the item ID.`);
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Redirect with success parameter for Django messages
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.set('quick_save_success', itemId);
+                        window.location.href = currentUrl.toString();
+                    } else {
+                        alert(`Error saving item: ${data.message || 'Failed to save item'}`);
+                        // Restore button state on error
+                        quickSaveButton.innerHTML = originalText;
+                        quickSaveButton.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(`Error: ${error.message}`);
+                    // Restore button state on error
+                    quickSaveButton.innerHTML = originalText;
+                    quickSaveButton.disabled = false;
+                });
+        });
+        
+        // Allow Enter key to trigger save
+        quickItemIdInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                quickSaveButton.click();
+            }
+        });
+    }
+});
+</script>
+
+<script>
+// Edit item popup functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.getElementById('edit-item-overlay');
+    const closeBtn = document.getElementById('close-edit-popup');
+    const cancelBtn = document.getElementById('cancel-edit');
+    const saveBtn = document.getElementById('save-item-changes');
+    const categoryDropdown = document.getElementById('popup-category-dropdown');
+    const colorDropdown = document.getElementById('popup-color-dropdown');
+    const featuredCheckbox = document.getElementById('popup-featured-checkbox'); // Add this
+    const itemIdInput = document.getElementById('popup-item-id');
+
+    // Open popup when edit icon is clicked
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-item-btn')) {
+            const button = e.target.closest('.edit-item-btn');
+            const container = button.closest('.published-item-container');
+            const itemId = container.dataset.itemid;
+            const currentColor = container.dataset.color;
+            const currentCategoryId = container.dataset.categoryid || '';
+            const currentFeatured = container.dataset.featured === 'true'; // Add this
+            
+            // Set current values
+            itemIdInput.value = itemId;
+            categoryDropdown.value = currentCategoryId;
+            colorDropdown.value = currentColor;
+            featuredCheckbox.checked = currentFeatured; // Add this
+            
+            // Sort the categoryDropdown options alphabetically by visible text
+            const options = Array.from(categoryDropdown.options);
+
+            options.sort((a, b) => {
+                const textA = a.text.toLowerCase();
+                const textB = b.text.toLowerCase();
+                return textA.localeCompare(textB);
+            });
+
+            // Clear and repopulate dropdown with sorted options
+            categoryDropdown.innerHTML = '';
+            options.forEach(option => categoryDropdown.appendChild(option));
+
+            // Show overlay
+            overlay.classList.remove('hidden');
+        }
+    });
+
+    // Close popup functions
+    function closePopup() {
+        overlay.classList.add('hidden');
+    }
+
+    closeBtn.addEventListener('click', closePopup);
+    cancelBtn.addEventListener('click', closePopup);
+    
+    // Close on overlay click
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            closePopup();
+        }
+    });
+
+    // Save changes
+    saveBtn.addEventListener('click', function() {
+        const itemId = itemIdInput.value;
+        const categoryId = categoryDropdown.value;
+        const color = colorDropdown.value;
+        const featured = featuredCheckbox.checked; // Add this
+        const csrftoken = getCookie('csrftoken');
+
+        fetch('/update_category/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({ 
+                itemId: itemId, 
+                categoryId: categoryId,
+                color: color,
+                featured: featured // Add this
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Show success message
+                const message = document.getElementById('popup-update-message');
+                message.classList.remove('hidden');
+                
+                // Close popup after short delay
+                setTimeout(() => {
+                    closePopup();
+                    message.classList.add('hidden');
+                    // Optionally reload the page or update the item display
+                    location.reload();
+                }, 1500);
+            } else {
+                console.error('Failed to update item');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating item:', error);
+        });
+    });
+});
+</script>
+
+<script src="{% static 'js/search_results.js' %}"></script>
+
+{% endblock %}

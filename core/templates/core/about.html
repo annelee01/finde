@@ -1,0 +1,265 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+<title>{% block title %}About{% endblock %} | Curated Vintage Clothing & Accessories</title>
+
+{% block content %}
+
+<style>
+    /* Styles Override main.css*/
+    body {
+        background-color: #ddd9d9;
+    }
+    p {
+        opacity: .85;
+    }
+    .title {
+        padding-bottom: 3rem;
+    }
+    /* Default Font Sizes */
+    .AdobeCaslonProItalic {
+        font-family: AdobeCaslonProItalic;
+        font-size: 3rem;
+        line-height: 1.2;
+        letter-spacing: -.1rem;
+        opacity: .85;
+    }
+    .AdobeCaslonProItalic-small {
+        font-family: AdobeCaslonProItalic;
+        font-size: 1.5rem;
+        line-height: 2rem;
+        letter-spacing: -.01rem;
+    }
+    .AdobeCaslonProRegular {
+        font-family: AdobeCaslonProRegular;
+        font-size: 1.5rem;
+        line-height: 2rem;
+    }
+    .AnturaScript {
+            margin-bottom: 1rem;
+            font-size: 3.75rem;
+     }
+
+    /* Mobile (≤ 425px) */
+    @media (max-width: 425px) {
+        main {
+            margin-top: .5rem;
+        }
+        .title {
+            padding-bottom: 1.5rem;
+        }
+        .AnturaScript {
+            margin-bottom: 1rem;
+            font-size: 4rem;
+            padding-right: 2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+            margin-right: -2.6rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+        }
+        .AdobeCaslonProItalic {
+            font-size: 3.25rem;
+            padding-bottom: 2rem; /* Mobile display compensation so the font descender doesnt get clipped */
+            margin-bottom: -2rem; /* Mobile display compensation so the font descender doesnt get clipped */
+
+        }
+        .AdobeCaslonProItalic-small {
+            font-size: 1rem;
+            line-height: 1.5rem;
+        }
+        .AdobeCaslonProRegular {
+            font-size: 1rem;
+            line-height: 1.5rem;
+        }
+    }
+
+    /* Tablet (≥ 768px) */
+    @media (min-width: 768px) {
+        main {
+            margin-top: 1rem;
+        }
+        .title {
+            padding-bottom: 2.5rem;
+        }
+        .AnturaScript {
+            margin-bottom: 1rem;
+            font-size: 5.65rem;
+            letter-spacing: -0.65rem !important;
+            padding-right: 2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+            margin-right: -2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+        }
+        .AdobeCaslonProItalic {
+            font-size: 4.4375rem;
+        }
+      
+    }
+
+    /* Desktop (≥ 1024px) */
+    @media (min-width: 1024px) {
+        main {
+            margin-top: 3.5rem;
+        }
+        .title {
+            padding-bottom: 4rem;
+        }
+        .AnturaScript {
+            font-size: 8.5rem;
+            margin: 0;
+            letter-spacing: -1.25rem !important;
+            padding-right: 2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+            margin-right: -2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+        }
+        .AdobeCaslonProItalic {
+            font-size: 5.875rem;
+            margin: 0;
+        }
+    }
+</style>
+
+<div style="max-width: 1000px; margin: 0 auto;">
+
+    <div>
+        <!-- Uncomment if needed: Profile Pic
+        <img src="{{ MEDIA_URL }}webp_images/Anne-Lee.png" alt="Anne Lee" style="max-width: 180px; margin:0 4rem 2rem 0;">
+        -->
+        
+        <div class='title' style="text-align: center; padding-top: 1rem;">
+            <div style="display:flex; justify-content: center; align-items: baseline;">
+                <p class="AnturaScript">E</p>
+                <span class="AdobeCaslonProItalic">verything</span>
+            </div>
+                <span class="AdobeCaslonProItalic">You Want<br>Already Exists</span>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 6.5rem;" class="flex flex-col lg:flex-row justify-between mb-50">
+
+        <!-- Column 1 -->
+        <div class="text-center lg:text-left lg:mb-0">
+
+            <div class="flex justify-between max-w-[472px] mx-auto lg:mx-0 pb-8">
+                <p class="AdobeCaslonProRegular">
+                    CONTACT
+                    <br>
+                    <a href="mailto:hello@finde.clothing" class="underline">hello@finde.clothing</a>
+                </p>
+                <p class="AdobeCaslonProRegular">
+                    INSTAGRAM 
+                    <br>
+                    <a href="https://www.instagram.com/finde.clothing" class="underline">@finde.clothing</a>
+                </p>
+            </div>
+
+            <p class="AdobeCaslonProRegular max-w-[472px] mx-auto lg:mx-0">
+                Quality vintage browsing, made effortless. <a href="https://www.finde.clothing" class="AdobeCaslonProItalic-small underline">Finde</a>
+                offers a curated selection of vintage pieces, carefully selected from eBay's vast marketplace. 
+                Discover kitten heels that purr, silky dresses that slink, and leather bags that age like organic wine. 
+                Your secret sustainable outfit finder for vintage adorers. 
+                Daily curation. Fast-moving rare finds. Browse and see what you <i class="AdobeCaslonProRegular" style="letter-spacing: -.01rem;">finde.</i> (New features, soon!)
+                <br><br>
+            </p>
+            <a href="/browse/" class="button-dark" style="margin-bottom:2.5rem;">
+                Browse Finde
+            </a>
+            <br><br>
+        </div>
+    
+        <!-- Column 2 -->
+        <div class="text-center lg:text-left">
+            <p style="text-align: center;" class="AdobeCaslonProRegular pb-5">
+                REASONS WHY<br>SECONDHAND IS THE<br>FIRST OPTION
+            </p>
+    
+            <div class="AdobeCaslonProRegular-small flex justify-center lg:justify-start">
+                <p class="AdobeCaslonProItalic-small text-right mr-2" style="line-height: 5vh;">  
+                    I.<br>II.<br>III.<br>IV.<br>V.<br>VI.
+                </p>
+    
+                <p class="AdobeCaslonProItalic-small text-left" style="line-height: 5vh;">
+                    Supports Investment Pieces<br>
+                    Supports Individual Style<br>
+                    Supports Quality<br>
+                    Supports Longevity<br>
+                    Supports The Environment<br>
+                    Supports Local Economies<br>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+
+     <!-- Column 3 -->
+    <div class="text-center lg:text-left">
+        <p style="text-align: center; margin-bottom: 0 !important; padding-bottom: 6rem !important;" class="AdobeCaslonProItalic title">
+            The Art of the Find
+        </p>
+ 
+        <div class="AdobeCaslonProRegular-small justify-center items-center lg:justify-start" style="padding-bottom: 4rem; max-width:400px; margin: 0 auto;">
+            <p style="text-align: center; margin-bottom: 0 !important; padding-bottom: 1.25rem !important;" class="AdobeCaslonProRegular">
+            Browse Curated Vintage
+            </p>
+            <p class="AdobeCaslonProItalic-small text-left" style="text-align: center;"> 
+                The best curated vintage pieces, directly from the source. When you click on an item you love, you'll be redirected to its original listing to complete your purchase.
+            </p> 
+            <p data-v-756a315e="" class="AdobeCaslonProRegular" style="font-feature-settings: &quot;ornm&quot;; text-align: center; margin:4rem auto;">
+                f
+            </p> 
+            
+
+            <p style="text-align: center; margin-bottom: 0 !important; padding-bottom: 1.25rem !important;" class="AdobeCaslonProRegular">
+            Live Listings
+            </p>
+            <p class="AdobeCaslonProItalic-small text-left" style="text-align: center;"> 
+                No more clicking on dead links. You can <a href="{% url 'account_signup' %}" style="text-decoration: underline;">create a finde account</a> to keep track of pieces you love and see when they sell out. It's also an easy way to quickly browse your saved favorites.
+            </p>
+            <p data-v-756a315e="" class="AdobeCaslonProRegular" style="font-feature-settings: &quot;ornm&quot;; text-align: center; margin: 4rem auto;">
+                z
+            </p> 
+
+
+
+        </div>
+
+        <!-- Email Signup -->
+        <div class="w-full md:w-2/6 flex flex-col items-center justify-center" style="padding-bottom: 6.5rem; margin: auto; text-align:center; ">
+            <p style="text-align: center; margin-bottom:1rem;" class="AdobeCaslonProRegular">
+                Newsletter Signup
+            </p>
+            <form method="post" action="{% url 'capture_email' %}" class="w-full flex flex-col items-center">
+                {% csrf_token %}
+                <input type="email" name="email" placeholder="Enter your email" 
+                class="mb-2 w-full max-w-xs border border-gray-300 rounded-full focus:outline-none focus:ring-1 focus:ring-[#0073ff] focus:border-[#0073ff] transition"
+                style="border-radius: 9999px !important; padding: .5rem 1rem !important; margin-bottom: 1.25rem !important">
+                <button type="submit" class="button-light mb-2">Subscribe</button>
+                {% if messages %}
+                <ul class="text-gray-500 text-center">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </form>
+        </div>
+
+
+    </div>
+        
+
+    <!-- <img src="{{ MEDIA_URL }}webp_images/Group_177.png" alt="tulips" class="max-w-[1300px] w-full h-auto mx-auto pb-18" style="padding-bottom: 6.5rem;">-->
+
+    <p style=" margin: auto; text-align:center; padding-bottom: 10rem;">
+        BROWSE ITEMS
+        <br>
+        <a href="/browse/" style="text-align: center; text-decoration: underline;">finde.clothing/browse</a>
+    </p>
+
+</div>
+
+
+<a href="/browse/" class="AnturaScript" style="font-size: 11.5vw; display: block; text-align: center; letter-spacing: 0rem !important; margin-left:-4px; margin-right: 0 !important; padding-right: 0 !important;">Finde.Clothing</a>
+    
+
+
+
+
+
+{% endblock %}

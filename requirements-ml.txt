@@ -1,0 +1,11 @@
+# Optional: on-device garment detection (YOLOS-Fashionpedia + K-means color clustering)
+# used by core/listings/smart_fashion_detection.py. The web app runs without these;
+# the detector is only imported when the listing-creation flow calls it.
+-r requirements.txt
+
+numpy==1.26.4
+opencv-python==4.11.0.86
+scikit-learn==1.7.1
+scipy==1.16.1
+torch==2.2.2
+transformers==4.55.4

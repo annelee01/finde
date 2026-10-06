@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Your Finde Account</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        /* Container */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eeeeee;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #333333;
+            font-size: 24px;
+        }
+        
+        /* Content */
+        .content {
+            padding: 30px 0;
+        }
+        
+        /* Button styles */
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .button {
+            display: inline-block;
+            background-color: #0073ff;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        /* Link fallback */
+        .link-fallback {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666666;
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Welcome to Finde!</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hello{% if name %} {{ name }}{% endif %},</p>
+            
+            <p>Thank you for signing up with Finde! To complete your registration and get started, please verify your email address.</p>
+            
+            <div class="button-container">
+                <a href="{{ activate_url }}" class="button">Confirm Email Address</a>
+            </div>
+            
+            <p class="link-fallback">
+                If the button above doesn't work, copy and paste this link into your browser:<br>
+                <a href="{{ activate_url }}">{{ activate_url }}</a>
+            </p>
+            
+            <p>This confirmation link will expire in 3 days.</p>
+            
+            <p>If you did not sign up for an account on Finde, you can safely ignore this email.</p>
+            
+            <p>Best regards,<br>The Finde Team</p>
+            
+        </div>
+        
+        <div class="footer">
+            <p>© {% now "Y" %} Finde. All rights reserved.</p>
+            <br><a href="https://www.finde.clothing">www.finde.clothing</a>
+            <p>
+                <small>If you no longer wish to receive these emails, you can 
+                <a href="mailto:unsubscribe@{{ site_domain }}?subject=Unsubscribe">unsubscribe</a>.</small>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

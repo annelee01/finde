@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Account Management{% endblock %}
+
+
+
+{% block sidebar %}
+    <nav class="sidebar">
+        <a href="{% url 'core:account_edit-profile' %}">Edit Profile</a>
+        <br>
+        <a href="{% url 'core:account_management' %}" style="font-weight:bold;">Account</a>
+        <br>
+        <a href="{% url 'account_logout' %}">Logout</a>
+    </nav>
+{% endblock %}
+
+{% block content %}
+
+<div class="settings-content">
+    <h1 class="sm:text-md md:text-xl leading-tight font-semibold" style="margin-bottom:1rem;">Account</h1>  
+    <form id="account-form" method="post" enctype="multipart/form-data" data-recaptcha-action="account_update">
+        {% csrf_token %}
+
+        <!-- Email Section -->
+        <div class="{% if email_form.email.errors %}has-error{% endif %}">
+            <label for="id_email">Email</label>
+            {{ email_form.email }}
+            {% if email_form.email.errors %}
+                <div class="error" style="margin-top: -1rem !important;font-size: .75rem !important;">{{ email_form.email.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Password Section -->
+        {% if has_password %}
+            <p class="sm:text-md md:text-xl leading-tight font-semibold">Change Password</p>
+            <p style="margin-bottom: 1.25rem">Fill in the fields below to change your password.</p>
+            <div>
+                <label for="id_old_password">Current Password</label>
+                {{ password_form.old_password }}
+                {% if password_form.old_password.errors %}
+                    <ul class="errorlist">
+                        {% for error in password_form.old_password.errors %}
+                            <li class="error" style="margin: -1rem 0 1.25rem !important;font-size: .75rem !important;">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_new_password1">New Password</label>
+                {{ password_form.new_password1 }}
+                {% if password_form.new_password1.errors %}
+                    <ul class="errorlist">
+                        {% for error in password_form.new_password1.errors %}
+                            <li class="error" style="margin: -1rem 0 1.25rem !important;font-size: .75rem !important;">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_new_password2">Confirm New Password</label>
+                {{ password_form.new_password2 }}
+                {% if password_form.new_password2.errors %}
+                    <ul class="errorlist">
+                        {% for error in password_form.new_password2.errors %}
+                            <li class="error" style="margin: -1rem 0 1.25rem !important;font-size: .75rem !important;">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% else %}
+            <p class="sm:text-md md:text-xl leading-tight font-semibold">Set a Password</p>
+            <p>Since you signed up with Google, setting a password gives you another way to log in and adds extra security.</p>
+            <div>
+                <label for="id_new_password1">New Password:</label>
+                {{ password_form.new_password1 }}
+                {% if password_form.new_password1.errors %}
+                    <ul class="errorlist">
+                        {% for error in password_form.new_password1.errors %}
+                            <li class="error" style="margin: -1rem 0 1.25rem !important;font-size: .75rem !important;">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_new_password2">Confirm New Password</label>
+                {{ password_form.new_password2 }}
+                {% if password_form.new_password2.errors %}
+                    <ul class="errorlist">
+                        {% for error in password_form.new_password2.errors %}
+                            <li class="error" style="margin: -1rem 0 1.25rem !important;font-size: .75rem !important;">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Hidden Fields to Indicate Form Submission -->
+        <input type="hidden" name="email_change" id="email_change" value="0" />
+        <input type="hidden" name="password_change" id="password_change" value="0" />
+
+        <!-- reCAPTCHA Token -->
+        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+
+        <!-- Submit Button -->
+        <button type="submit" class="button-dark">Save Changes</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+     const emailInput = document.getElementById('id_email');
+     const passwordInputs = document.querySelectorAll('input[type="password"]');
+     const emailChangeField = document.getElementById('email_change');
+     const passwordChangeField = document.getElementById('password_change');
+     const form = document.getElementById('account-form');
+ 
+     emailChangeField.value = '0';
+     passwordChangeField.value = '0';
+ 
+     emailInput.addEventListener('input', function () {
+         emailChangeField.value = '1';
+         passwordChangeField.value = '0';
+         console.log('Email changed:', emailChangeField.value);  // Check log
+     });
+ 
+     passwordInputs.forEach(function (passwordInput) {
+         passwordInput.addEventListener('input', function () {
+             passwordChangeField.value = '1';
+             emailChangeField.value = '0';
+             console.log('Password changed:', passwordChangeField.value);  // Check log
+         });
+     });
+ 
+     form.addEventListener('submit', function (event) {
+         console.log('emailChangeField:', emailChangeField.value);  // Check log
+         console.log('passwordChangeField:', passwordChangeField.value);  // Check log
+         
+         if (emailChangeField.value === '0' && passwordChangeField.value === '0') {
+             event.preventDefault();
+             alert('Please update either email or password before submitting.');
+         }
+     });
+ });
+ 
+ form.addEventListener('submit', function (event) {
+     console.log('Form submitted');
+     // Add the force-submit test
+     form.submit();  // This ensures that the form will submit for testing purposes
+ });
+ 
+ </script>
+ 
+{% endblock %}
+
+{% block recaptcha %}
+    <script src="https://www.google.com/recaptcha/api.js?render=6LeomTgqAAAAAMtjzmmPKW3Lf14A8T_80DojiJB7"></script>
+    {{ block.super }} <!-- This will include the reCAPTCHA script from base.html -->
+{% endblock recaptcha %}
+

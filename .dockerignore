@@ -1,0 +1,11 @@
+.git
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+media/
+staticfiles/
+*.pem
+.DS_Store
+.vscode/

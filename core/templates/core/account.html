@@ -1,0 +1,232 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block sidebar %}
+    <nav class="sidebar">
+        <a href="{% url 'core:account_edit-profile' %}" style="font-weight:bold;">Edit Profile</a>
+        <br>
+        <a href="{% url 'core:account_management' %}">Account</a>
+        <br>
+        <a href="{% url 'account_logout' %}">Log Out</a>
+    </nav>
+{% endblock %}
+
+{% block content %}
+
+<div class="settings-content">
+    <form id="profile-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h1 class="sm:text-md md:text-2xl leading-tight font-semibold">Edit Profile</h1>  
+        <!-- Profile Picture -->
+        <div class="{% if profile_form.profile_picture.errors %}has-error{% endif %}">
+            <div class="relative" style="padding: 1rem 0;">
+                <div id="profile-picture-container" class="flex items-center justify-center" style="height:9rem; width:7.6rem; border-radius:50%;">
+                    {% if user.profile.profile_picture %}
+                        <img id="profile-picture" 
+                            src="{{ user.profile.profile_picture.url }}" 
+                            alt="Profile Picture"   onerror="this.style.display='none';" 
+                            style="height:9rem; width:7.6rem; border-radius: 50%; object-fit:cover;"/>
+                    {% else %}
+                        <span class="bg-gray-300" style="height:9rem; width:7.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-align: center;">
+                            No Image
+                        </span> 
+                    {% endif %}
+                </div>
+            </div>
+
+            <input type="file" id="id_profile_picture" name="profile_picture" class="hidden" accept="image/*" />
+
+            <button type="button" id="upload-button" class="button-light" style="display:inline-block; margin: .25rem 0 1.5rem 0;">Change Picture</button>
+            {% if profile_form.profile_picture.errors %}
+                <div class="error">{{ profile_form.profile_picture.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div style="display:flex;">
+            <!-- First Name -->
+            <div class="{% if user_form.first_name.errors %}has-error{% endif %} pr-4">
+                <label for="id_first_name">First Name</label>
+                {{ user_form.first_name }}
+                {% if user_form.first_name.errors %}
+                    <div class="error">{{ user_form.first_name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Last Name -->
+            <div class="{% if user_form.last_name.errors %}has-error{% endif %}">
+                <label for="id_last_name">Last Name</label>
+                {{ user_form.last_name }}
+                {% if user_form.last_name.errors %}
+                    <div class="error">{{ user_form.last_name.errors }}</div>
+                {% endif %}
+                <div style="margin-top:-1.15rem; font-style:italic; letter-spacing:.02rem;" class="caption1-regular">Last name is not publicly displayed</div>
+            </div>    
+        </div>
+
+        <!-- Bio -->
+        <div class="{% if profile_form.bio.errors %}has-error{% endif %}">
+            <label for="id_bio">Bio</label>
+            {{ profile_form.bio }}
+            <div id="charCount" style='margin-top:-10px; margin-bottom:1.5rem;' class="caption1-regular">160 characters remaining</div>
+            {% if profile_form.bio.errors %}
+                <div class="error">{{ profile_form.bio.errors }}</div>
+            {% endif %}
+        </div>
+
+        <script>
+            const bioInput = document.getElementById('id_bio');
+            const charCount = document.getElementById('charCount');
+            const maxLength = 160;
+        
+            // Initialize character count on page load
+            updateCharacterCount();
+            
+            bioInput.addEventListener('input', function() {
+                updateCharacterCount();
+            });
+
+            function updateCharacterCount() {
+                const remaining = maxLength - bioInput.value.length;
+
+                if (remaining < 0) {
+                    charCount.textContent = 'Limit exceeded!';
+                } else if (remaining === 0) {
+                    charCount.textContent = '';
+                } else {
+                    charCount.textContent = remaining + ' characters remaining';
+                }
+            }
+        </script>
+        
+        <!-- Location -->
+        <div class="{% if profile_form.location.errors %}has-error{% endif %}">
+            <label for="id_location">Location</label>
+            {{ profile_form.location }}
+            {% if profile_form.location.errors %}
+                <div class="error">{{ profile_form.location.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Username -->
+        <div class="{% if user_form.username.errors %}has-error{% endif %}">
+            <label for="id_username">Username</label>
+            {{ user_form.username }}
+            {% if user_form.username.errors %}
+                <div class="error">{{ user_form.username.errors }}</div>
+            {% endif %}
+        </div>
+        <p class="caption1-regular" style="margin-top:-1.15rem;">finde.clothing/{{ user.username }}</p>   
+    
+        <button class="button-dark mt-6 ml-0" type="submit">Save changes</button>
+    </form>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const profilePictureInput = document.getElementById('id_profile_picture');
+        const profilePictureContainer = document.getElementById('profile-picture-container');
+        const profilePicture = document.getElementById('profile-picture');
+        const uploadButton = document.getElementById('upload-button');
+
+        if (!profilePictureInput) {
+            console.error('Profile picture input not found.');
+            return;
+        }
+
+        // Open the file dialog when the button is clicked
+        uploadButton.addEventListener('click', () => {
+            profilePictureInput.click();
+        });
+
+        profilePictureInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+            if (file) {
+            // Client-side validation for file extensions
+            const allowedExtensions = ['jpg', 'jpeg', 'png', 'heif'];
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedExtensions.includes(fileExt)) {
+                alert('Only JPG, JPEG, and PNG formats are allowed.');
+                profilePictureInput.value = ''; // Clear the invalid file
+                return;
+            }
+            
+            // Client-side validation for big profile pic file sizes
+            if (file.size > 10 * 1024 * 1024) { // 1-MB limit
+                    alert('Image too large. Please select an image smaller than 10MB.');
+                    profilePictureInput.value = ''; // Clear the invalid file
+
+                    // Don't clear the profile picture container, just stop further processing
+                    return; // Stop further processing
+                }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Create an img tag to update the preview
+                const newImage = document.createElement('img');
+                newImage.src = e.target.result;
+                newImage.alt = 'Profile Picture';
+                newImage.style.height = '9rem';
+                newImage.style.width = '7.6rem';
+                newImage.style.borderRadius = '50%';
+                newImage.style.objectFit = 'cover';  // Ensures the image covers the container without warping
+
+                // Replace the 'No Image' text with the new image
+                profilePictureContainer.innerHTML = '';
+                profilePictureContainer.appendChild(newImage);
+                
+                // Store the base64 data in a hidden input field
+                const base64Input = document.getElementById('profile_picture_base64');
+                if (!base64Input) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.id = 'profile_picture_base64';
+                    input.name = 'profile_picture_base64';
+                    input.value = e.target.result;
+                    profilePictureContainer.appendChild(input);
+                } else {
+                    base64Input.value = e.target.result;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    });
+</script>
+
+<!-- Unsaved Changes dialoge if user edits profile forms and then clicks away from the page without saving -->
+<script>
+    let isFormDirty = false; // Flag to track if form has unsaved changes
+
+    // Function to mark form as dirty when any input changes
+    function markFormAsDirty() {
+        isFormDirty = true;
+    }
+
+    // Attach event listeners to form inputs
+    const formInputs = document.querySelectorAll('#profile-form input, #profile-form textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('input', markFormAsDirty);
+    });
+
+    // Beforeunload event to warn user about unsaved changes
+    window.addEventListener('beforeunload', function (e) {
+        if (isFormDirty) {
+            const confirmationMessage = 'You have unsaved changes. Are you sure you want to leave?';
+            e.returnValue = confirmationMessage; // Standard for most browsers
+            return confirmationMessage; // For some browsers (e.g., older Chrome versions)
+        }
+    });
+
+    // Optionally, you can also reset the flag when the form is successfully saved or submitted
+    const form = document.getElementById('profile-form');
+    form.addEventListener('submit', () => {
+        isFormDirty = false; // Mark form as clean after submission
+    });
+</script>
+{% endblock %}

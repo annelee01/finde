@@ -1,0 +1,1111 @@
+{% extends 'core/base.html' %}
+
+
+{% block content %}
+
+{% load static %}
+
+{% load custom_tags %}
+
+<script type="module" src="{% static 'js/favorite.js' %}"></script>
+<script type="module" src="{% static 'js/tab_navigation.js' %}"></script>
+<script async defer src="//assets.pinterest.com/js/pinit.js"></script>
+
+<!-- Ensure that the getCookie function is available to all scripts -->
+<script>
+    // Function to get a cookie value by name
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+
+<style>
+  
+/* Default Font Sizes */
+.AdobeCaslonProItalic {
+    font-family: AdobeCaslonProItalic;
+    font-size: 3rem;
+    line-height: 1.2;
+    letter-spacing: -.1rem;
+    opacity: .85;
+}
+.AdobeCaslonProItalic-small {
+    font-family: AdobeCaslonProItalic;
+    font-size: 1.25rem;
+    line-height: 2rem;
+    letter-spacing: -.01rem;
+}
+.AdobeCaslonProRegular {
+    font-family: AdobeCaslonProRegular;
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+.AnturaScript {
+        margin-bottom: 1rem;
+        font-size: 3.75rem;
+    }
+
+    /* Tablet (≤ 768px) */
+    @media screen and (max-width: 768px) {
+        main {
+        padding-top: 0 !important;
+    }
+}
+
+
+/* Mobile (≤ 425px) */
+@media (max-width: 425px) {
+    .AnturaScript {
+        margin-bottom: 1rem;
+        font-size: 4rem;
+        padding-right: 2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+        margin-right: -2.6rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+    }
+    .AdobeCaslonProItalic {
+        font-size: 3.25rem;
+        padding-bottom: 2rem; /* Mobile display compensation so the font descender doesnt get clipped */
+        margin-bottom: -2rem; /* Mobile display compensation so the font descender doesnt get clipped */
+
+    }
+    .AdobeCaslonProItalic-small {
+        font-size: 1.05rem;
+    }
+    .AdobeCaslonProRegular {
+        font-size: 1.15rem;
+    }
+}
+
+/* Tablet (≥ 768px) */
+@media (min-width: 768px) {
+
+    .AnturaScript {
+        margin-bottom: 1rem;
+        font-size: 5.65rem;
+        letter-spacing: -0.65rem !important;
+        padding-right: 2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+        margin-right: -2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+    }
+    .AdobeCaslonProItalic {
+        font-size: 4.4375rem;
+    }
+    
+}
+
+/* Desktop (≥ 1024px) */
+@media (min-width: 1024px) {
+
+    .AnturaScript {
+        font-size: 8.5rem;
+        margin: 0;
+        letter-spacing: -1.25rem !important;
+        padding-right: 2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+        margin-right: -2rem; /* Mobile display compensation so the font flourish doesnt get clipped */
+    }
+    .AdobeCaslonProItalic {
+        font-size: 5.875rem;
+        margin: 0;
+    }
+}
+
+
+
+
+/* PDP Modal Styles */
+.pdp-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white; /* Change to white instead of overlay */
+    z-index: 1000;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto; /* Modal itself scrolls */
+    padding: 0;
+}
+
+.pdp-modal.active {
+    display: block; /* Change from flex to block for natural flow */
+}
+
+.pdp-content {
+    background: white;
+    width: 100%;
+    min-height: 100vh; /* Minimum full height */
+    border-radius: 0;
+    overflow: visible;
+    position: relative;
+    margin: 0;
+    /* Remove flex properties */
+}
+
+.pdp-image-container {
+    min-height: auto;
+    overflow: visible; /* Let it flow naturally */
+}
+
+.pdp-favorite-button {
+    border: 1px solid #48110C;
+    margin: 0 !important;
+}
+
+.pdp-image {
+    width: 100%;
+    height: auto;
+    max-height: 50vh; /* Reduce to leave more space for content */
+    object-fit: cover;
+    display: block;
+    border-radius: 0;
+}
+
+.pdp-details {
+    padding: 1rem;
+    background: white;
+    /* Remove overflow and flex properties */
+    padding-bottom: 2rem; /* Add extra bottom padding */
+}
+
+.pdp-close {
+    display: none; /* Hide by default (mobile) */
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border-radius: 50%;
+    width: 2.25rem;
+    height: 2.25rem;
+    transition: all 0.2s;
+}
+
+/* Mobile-only sticky back button */
+.pdp-back-mobile {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    border: none;
+    cursor: pointer;
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.9); 
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    transition: all 0.2s;
+    color: white; /* Light arrow on dark background */
+    backdrop-filter: blur(20px); /* Optional: adds nice blur effect */
+}
+
+
+.pdp-back-mobile:hover {
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.overlay {
+    display:none;
+}
+
+/* Desktop adjustments */
+@media (min-width: 768px) {
+    .overlay {
+        display:flex;
+    }
+
+    .pdp-modal {
+        align-items: center;
+        padding: 40px;
+        background: rgba(0, 0, 0, 0.8); /* Add back the overlay background */
+    }
+    
+    .pdp-modal.active {
+        display: flex; /* Change from flex to block for natural flow */
+    }
+
+    .pdp-content {
+        max-width: 600px;
+        width: auto; /* Add this - don't force 100% width */
+        height: auto; /* Add this - don't force 100% height */
+        min-height: auto; /* Remove forced min-height */
+        display: flex;
+        border-radius: .8rem;
+        flex-direction: row;
+        max-height: 80vh;
+        overflow: hidden; /* Add this back for rounded corners */
+    }
+
+    .pdp-image-container {
+        flex: 1;
+        min-height: 400px;
+        overflow: hidden; /* Add this back */
+    }
+
+    .pdp-image {
+        width: 100%;
+        height: 100%; /* Change back to 100% for desktop */
+        max-height: none; /* Remove mobile restriction */
+        object-fit: cover;
+        display: block;
+        border-radius: 12px 0 0 12px; /* Add back desktop border radius */
+        flex-shrink: 0;
+    }
+
+    .pdp-details {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        background: white; /* Ensure white background */
+    }
+
+    .pdp-back-mobile {
+        display: none;
+    }
+    
+    .pdp-close {
+        display: flex;
+    }
+}
+
+/* Measurements styles */
+.pdp-detailed-measurements {
+    margin: 16px 0;
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.pdp-detailed-measurements h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.measurements-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.measurement-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.measurement-item:last-child {
+    border-bottom: none;
+}
+
+.measurement-label {
+    font-weight: 500;
+    opacity: .8;
+}
+
+.measurement-value {
+    font-weight: 600;
+}
+
+@media (min-width: 768px) {
+    .measurements-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+
+
+
+
+/* Curated Filters Styling */
+.curated-filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.curated-filter-btn {
+    position: relative;
+    min-width: 3.375rem;
+    border-radius: 4rem;
+    text-align: center;
+    padding: .5rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Toggle button styling */
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-weight: 400;
+    transition: all 0.2s ease;
+    
+    /* Default state - outlined style */
+    background: white;
+    color: #374151;
+    border-color: currentColor;
+}
+
+/* ACTIVE (PRESSED) STATE - Filled style */
+.curated-filter-btn.active {
+    color: white !important;
+    border-color: transparent;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Theme-specific colors */
+.curated-filter-btn.vacation {
+    border-color: #ffa358;
+    color: #ff860c;
+}
+
+.curated-filter-btn.vacation.active {
+    background: #ffa358;
+}
+
+.curated-filter-btn.linen {
+    border-color: #e0c19a;
+    color: #8b7355;
+}
+
+.curated-filter-btn.linen.active {
+    background: #e0c19a;
+}
+
+.curated-filter-btn.date-night {
+    border-color: #ff7777;
+    color: #f35656;
+}
+
+.curated-filter-btn.date-night.active {
+    background: #ff7777;
+}
+
+.curated-filter-btn.designer {
+    border-color: #ff99cc;
+    color: #ef6faf;
+}
+
+.curated-filter-btn.designer.active {
+    background: #ff99cc;
+}
+
+.curated-filter-btn.wedding-guest {
+    border-color: #dfa5a5;
+    color: #cb7c7c;
+}
+
+.curated-filter-btn.wedding-guest.active {
+    background: #dfa5a5;
+}
+
+/* Clear filters button - matches the style */
+.clear-filters-btn {
+    background: white;
+    color: #6b7280;
+    border: 2px solid #d1d5db;
+    padding: .5rem 1rem;
+    border-radius: 4rem;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.clear-filters-btn:hover {
+    border-color: #9ca3af;
+    color: #374151;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add subtle animation on toggle */
+.curated-filter-btn.active {
+    animation: togglePress 0.15s ease-out;
+    color:#48110C !important;
+}
+
+@keyframes togglePress {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+
+</style>
+
+<div id="results-message" style="display:flex; align-items: baseline;">
+    <!-- JS dynamic results message -->
+    <p style="display: none; clear: both; margin-bottom: 2rem;"></p>
+</div>
+
+
+<!-- CURATED FILTERS -->
+<div class="curated-filters-container">
+    <button class="curated-filter-btn linen" data-filter="linen">
+        Linen
+    </button>
+    <button class="curated-filter-btn vacation" data-filter="vacation">
+        Vacation
+    </button>
+    <button class="curated-filter-btn date-night" data-filter="date_night">
+        Date Night
+    </button>
+    <button class="curated-filter-btn designer" data-filter="designer">
+        Designer
+    </button>
+    <button class="curated-filter-btn wedding-guest" data-filter="wedding_guest">
+        Wedding Guest
+    </button>
+
+    <!-- New Clear All button (shows only when curated filter is active) -->
+    <a href="#" class="clear-all-button" style="display: none;">Clear All</a>
+
+
+</div>
+
+
+<div class="tags-container">
+
+    <!-- Category Tags Section -->
+    <div class="filter-section">
+        <h4 class="section-title">Categories</h4>
+        <div id="selected-category-filters" class="stacked-tags">
+            <div class="tag" data-type="category" data-value="163601">
+                <span>Belts</span>
+                <span class="close-button">×</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Filters Section -->
+    <div class="filter-section">
+        <h4 class="section-title">Tags</h4>
+        <div class="stacked-tags">
+            <div id="selected-top-category-filters"></div>
+            <div id="selected-size-filters"></div>
+            <div id="selected-color-filters"></div>
+            <div id="selected-price-filters"></div>
+        </div>
+        <button class="reset-all-filters-button callout-semibold">Clear All Filters</button>
+    </div>
+</div>
+
+
+
+
+<div style="display: flex; justify-content: flex-start; position: relative; align-items: start; margin-bottom: 1rem;"> <!-- begin menu container div -->
+
+    <!-- LEFT SIDE: Size filter button, Filter button, and Search button -->
+    <div style="display: flex; gap: 0.5rem; margin:0px !important; ">
+        <!-- MOBILE filter + button -->
+        
+        <div id="button-filter">
+            <button id="filter-button" class="button-filter button-light tablink" style="gap: 0.5rem; margin:0px !important;">
+                Filter
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M1 7L13 7M7 13L7 1" stroke="#48110C" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- commenting out search icon button near filter button
+        <div id="filter-search-icon" class="searchbar-icon">
+            <div class="button-light" style="min-height:39.5px !important; margin:0px !important;">
+                inactive icon 
+                <svg class="default-icon" style="padding:8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 21 21" fill="none">
+                    <path d="M7.50837 14.3092C11.115 14.3092 14.0387 11.3855 14.0387 7.77887C14.0387 4.17227 11.115 1.24854 7.50837 1.24854C3.90176 1.24854 0.978027 4.17227 0.978027 7.77887C0.978027 11.3855 3.90176 14.3092 7.50837 14.3092Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M12.1143 12.375L19.7257 19.9958" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                bold "active" icon
+                <svg class="bold-icon" style="padding:8px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none">
+                    <path d="M7.50857 12.2671C10.33 12.2671 12.6172 9.9799 12.6172 7.15847C12.6172 4.33703 10.33 2.0498 7.50857 2.0498C4.68713 2.0498 2.3999 4.33703 2.3999 7.15847C2.3999 9.9799 4.68713 12.2671 7.50857 12.2671Z" stroke="#48110C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M12.1143 11.7549L18.3009 17.9478" stroke="#48110C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </div>
+        </div>
+         -->
+
+    </div>
+
+    <!-- DESKTOP tablinks -->
+    <div class="tab-container">
+        <button class="tablink" data-tab="Category" style="padding-left: 0px !important; margin-left: 0px !important;">
+            Category
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" height="24" width="24" class="box-content block inline-block mb-1 size-4"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <button class="tablink" data-tab="Size">
+            Size
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" height="24" width="24" class="box-content block inline-block mb-1 size-4"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <button class="tablink" data-tab="Color">
+            Color
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" height="24" width="24" class="box-content block inline-block mb-1 size-4"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <button class="tablink" data-tab="Price">
+            Price
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" height="24" width="24" class="box-content block inline-block mb-1 size-4"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+    </div>
+        
+    <!-- Tabcontent -->  
+
+    <div class="slide-animation">
+        <div id="tabcontent-mobile-nav">
+            <div class="tab-navigation-wrapper">
+                <div id="tabName" class="mobile text-3xl mb-4">[DYNAMIC TAB NAME]</div>
+
+            <!-- CATEGORY Placeholder for navigation -->
+                <div class="tab-navigation">
+                    <button class="tablink-nav active" data-tab="Category">Category</button>
+                    <button class="tablink-nav" data-tab="Size">Size</button>
+                    <button class="tablink-nav" data-tab="Color">Color</button>
+                    <button class="tablink-nav" data-tab="Price">Price</button>
+                </div>
+
+                <button class="close-button" style="position: absolute; padding: .15rem .15rem 0 0; top: 0; right: 0; background: linear-gradient(to left, rgb(255, 255, 255) 51.56%, rgba(255, 255, 255, 0) 100%);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M7.05025 16.9497L16.9497 7.05017M16.9497 16.9497L7.05025 7.05017" stroke="#48110C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>                
+                </button>
+                
+                <div class="sticky-footer">
+                    <button class="reset-all-filters-button-mobile-overlay-menu button-light" style="margin:0;">Reset All Filters</button>
+                    <button class="close-button button-dark" style="margin:0;">Done</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- First layer: Top-level categories -->
+        <div id="Category" class="tabcontent" style="display: none;">
+            <div>
+                {% for top_level_category in unique_top_level_categories %}
+                    <div class="top_level_category top-level-link" data-top-category="{{ top_level_category }}">
+                        {% if top_level_category == "Accessories" %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="12" viewBox="0 0 21 12" fill="none">
+                                <path d="M19.9161 7.89913C19.9161 8.89586 19.5099 9.79886 18.86 10.4519C18.207 11.1018 17.304 11.508 16.3072 11.508H15.6479C13.7544 11.508 12.2047 10.052 12.0516 8.19596C12.0422 8.10222 12.0391 8.00536 12.0391 7.9085V7.89601C12.0391 7.33046 12.2734 6.8149 12.6452 6.44308C13.0202 6.06813 13.5389 5.83691 14.1106 5.83691H17.8476C18.9881 5.83691 19.913 6.75866 19.9192 7.89601L19.9161 7.89913Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8.90261 7.89913C8.90261 7.99287 8.89636 8.0866 8.89011 8.17721C8.82137 9.06459 8.43705 9.85823 7.84651 10.4519C7.19348 11.1018 6.29048 11.508 5.29374 11.508H4.63446C2.64411 11.508 1.03183 9.89885 1.02246 7.9085V7.89601C1.02246 7.33046 1.2568 6.8149 1.62863 6.44308C2.00357 6.06813 2.52225 5.83691 3.09405 5.83691H6.83103C7.97149 5.83691 8.89636 6.75866 8.90261 7.89601V7.89913Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M1.53418 6.54308C1.53418 6.54308 4.22755 2.34366 5.28366 1.54377C6.34913 0.737637 7.51772 1.43754 7.39274 2.71549" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M19.3502 6.54308C19.3502 6.54308 16.6568 2.34366 15.6007 1.54377C14.5352 0.737637 13.3667 1.43754 13.4916 2.71549" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M8.87695 8.21498C9.09255 7.55569 9.72371 7.07764 10.4642 7.07764C11.2048 7.07764 11.889 7.59632 12.0765 8.29934" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {% elif top_level_category == "Bags & Purses" %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 21 20" fill="none">
+                                <path d="M19.6601 15.9179L17.6261 5.9662C17.5479 5.585 17.3167 5.28816 17.0199 5.15381C17.3167 5.35691 17.5136 5.69748 17.5136 6.08493C17.5136 7.30351 17.0199 8.40648 16.2231 9.20325C15.4264 10 14.3203 10.4968 13.1017 10.4968H7.49934C5.06218 10.4968 3.08745 8.52209 3.08745 6.08493C3.08745 5.97869 3.10307 5.87559 3.12807 5.78185C3.10932 5.84122 3.09058 5.90371 3.07808 5.9662L1.04399 15.9179C0.68466 17.6771 1.82825 19.3675 3.37491 19.3675H17.3323C18.879 19.3675 20.0195 17.6771 19.6601 15.9179ZM11.7487 12.6215C11.7487 13.412 11.1082 14.0494 10.3208 14.0494C9.53343 14.0494 8.89289 13.412 8.89289 12.6215V11.9622C8.89289 11.1748 9.53343 10.5343 10.3208 10.5343C10.7145 10.5343 11.0707 10.6937 11.3301 10.953C11.5894 11.2123 11.7487 11.5685 11.7487 11.9622V12.6215Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M11.7479 11.9621V12.6214C11.7479 13.4119 11.1074 14.0493 10.32 14.0493C9.53263 14.0493 8.89209 13.4119 8.89209 12.6214V11.9621C8.89209 11.1747 9.53263 10.5342 10.32 10.5342C10.7137 10.5342 11.0699 10.6935 11.3293 10.9529C11.5886 11.2122 11.7479 11.5684 11.7479 11.9621Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M17.514 6.08451C17.514 7.30309 17.0203 8.40607 16.2236 9.20283C15.4268 9.99959 14.3207 10.4964 13.1021 10.4964H7.49977C5.06261 10.4964 3.08789 8.52167 3.08789 6.08451C3.08789 5.97828 3.10351 5.87517 3.12851 5.78143C3.12851 5.77831 3.13163 5.77518 3.13163 5.77518C3.18475 5.58771 3.28474 5.42211 3.41909 5.28775C3.62219 5.08465 3.90653 4.95654 4.21586 4.95654H16.386C16.6204 4.95654 16.836 5.02841 17.0172 5.15027C17.0172 5.15027 17.0203 5.15027 17.0203 5.15339C17.3172 5.35649 17.514 5.69706 17.514 6.08451Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M11.7479 11.9621V12.6214C11.7479 13.4119 11.1074 14.0493 10.32 14.0493C9.53263 14.0493 8.89209 13.4119 8.89209 12.6214V11.9621C8.89209 11.1747 9.53263 10.5342 10.32 10.5342C10.7137 10.5342 11.0699 10.6935 11.3293 10.9529C11.5886 11.2122 11.7479 11.5684 11.7479 11.9621Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M6.17725 4.95673V4.05373C6.17725 2.22586 7.66141 0.741699 9.48928 0.741699H11.1828C13.0138 0.741699 14.4948 2.22586 14.4948 4.05373V4.95673" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {% elif top_level_category == "Clothing" %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="20" viewBox="0 0 22 20" fill="none">
+                                <path d="M20.5127 5.3473L17.5225 8.33751L15.8634 6.67836V18.9767H5.03677V6.80022L3.49949 8.33751L0.509277 5.3473L3.39324 2.42583C4.04628 1.76342 4.93678 1.3916 5.86478 1.3916H7.07711C7.1271 2.65393 8.64876 3.66628 10.511 3.66628C12.3732 3.66628 13.8949 2.65393 13.9449 1.3916H15.0697C15.979 1.3916 16.8539 1.7478 17.5007 2.38834L20.5127 5.3473Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {% elif top_level_category == "Jewelry" %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="26" viewBox="0 0 18 26" fill="none">
+                                <path d="M15.263 14.5397C16.3467 14.5397 17.2252 13.6612 17.2252 12.5775C17.2252 11.4938 16.3467 10.6152 15.263 10.6152C14.1793 10.6152 13.3008 11.4938 13.3008 12.5775C13.3008 13.6612 14.1793 14.5397 15.263 14.5397Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M15.0355 18.82C16.1192 18.82 16.9977 17.9414 16.9977 16.8577C16.9977 15.774 16.1192 14.8955 15.0355 14.8955C13.9518 14.8955 13.0732 15.774 13.0732 16.8577C13.0732 17.9414 13.9518 18.82 15.0355 18.82Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M13.2132 22.9953C14.2969 22.9953 15.1754 22.1167 15.1754 21.033C15.1754 19.9493 14.2969 19.0708 13.2132 19.0708C12.1295 19.0708 11.251 19.9493 11.251 21.033C11.251 22.1167 12.1295 22.9953 13.2132 22.9953Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9.17316 24.651C10.2569 24.651 11.1354 23.7725 11.1354 22.6888C11.1354 21.6051 10.2569 20.7266 9.17316 20.7266C8.08946 20.7266 7.21094 21.6051 7.21094 22.6888C7.21094 23.7725 8.08946 24.651 9.17316 24.651Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M15.0286 10.2623C16.1123 10.2623 16.9909 9.38382 16.9909 8.30012C16.9909 7.21641 16.1123 6.33789 15.0286 6.33789C13.9449 6.33789 13.0664 7.21641 13.0664 8.30012C13.0664 9.38382 13.9449 10.2623 15.0286 10.2623Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M13.2078 6.08461C14.2915 6.08461 15.1701 5.20609 15.1701 4.12238C15.1701 3.03867 14.2915 2.16016 13.2078 2.16016C12.1241 2.16016 11.2456 3.03867 11.2456 4.12238C11.2456 5.20609 12.1241 6.08461 13.2078 6.08461Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9.1673 4.43129C10.251 4.43129 11.1295 3.55277 11.1295 2.46906C11.1295 1.38535 10.251 0.506836 9.1673 0.506836C8.0836 0.506836 7.20508 1.38535 7.20508 2.46906C7.20508 3.55277 8.0836 4.43129 9.1673 4.43129Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M3.07746 14.5397C4.16117 14.5397 5.03969 13.6612 5.03969 12.5775C5.03969 11.4938 4.16117 10.6152 3.07746 10.6152C1.99375 10.6152 1.11523 11.4938 1.11523 12.5775C1.11523 13.6612 1.99375 14.5397 3.07746 14.5397Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M3.30598 10.2623C4.38968 10.2623 5.2682 9.38382 5.2682 8.30012C5.2682 7.21641 4.38968 6.33789 3.30598 6.33789C2.22227 6.33789 1.34375 7.21641 1.34375 8.30012C1.34375 9.38382 2.22227 10.2623 3.30598 10.2623Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5.12678 6.08461C6.21048 6.08461 7.089 5.20609 7.089 4.12238C7.089 3.03867 6.21048 2.16016 5.12678 2.16016C4.04307 2.16016 3.16455 3.03867 3.16455 4.12238C3.16455 5.20609 4.04307 6.08461 5.12678 6.08461Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M3.30891 18.82C4.39261 18.82 5.27113 17.9414 5.27113 16.8577C5.27113 15.774 4.39261 14.8955 3.30891 14.8955C2.2252 14.8955 1.34668 15.774 1.34668 16.8577C1.34668 17.9414 2.2252 18.82 3.30891 18.82Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5.13019 22.9953C6.2139 22.9953 7.09242 22.1167 7.09242 21.033C7.09242 19.9493 6.2139 19.0708 5.13019 19.0708C4.04649 19.0708 3.16797 19.9493 3.16797 21.033C3.16797 22.1167 4.04649 22.9953 5.13019 22.9953Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9.17316 24.651C10.2569 24.651 11.1354 23.7725 11.1354 22.6888C11.1354 21.6051 10.2569 20.7266 9.17316 20.7266C8.08946 20.7266 7.21094 21.6051 7.21094 22.6888C7.21094 23.7725 8.08946 24.651 9.17316 24.651Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {% elif top_level_category == "Loungewear & Lingerie" %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="17" viewBox="0 0 26 17" fill="none">
+                                <path d="M12.4453 12.3051L11.7017 13.5924C11.4236 14.0736 11.0611 14.4767 10.6424 14.7891C9.40823 15.7109 7.69598 15.864 6.28055 15.0453L5.92434 14.8391C5.89622 14.8235 5.87122 14.8079 5.8431 14.7891C4.00898 13.6768 3.39031 11.2896 4.47141 9.41799L4.9401 8.60872C5.04321 8.45562 5.13382 8.29627 5.21506 8.13379L12.4453 12.3051Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5.2149 8.13379C5.13367 8.29627 5.04305 8.45562 4.93994 8.60872L5.2149 8.13379Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14.6425 14.7891H10.8868H10.6431" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M4.94003 8.6084C4.07452 9.95196 2.55911 10.8393 0.8406 10.8393H0.734375L1.79984 14.7888H5.84303" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5.21533 8.1337V1.19092" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M19.685 14.7893C19.6569 14.8081 19.6319 14.8237 19.6038 14.8393L19.2507 15.0455C17.8321 15.8642 16.1199 15.7111 14.8857 14.7893C14.467 14.4768 14.1045 14.0738 13.8265 13.5926L13.0859 12.3053L20.3131 8.13086C20.3943 8.29646 20.488 8.45581 20.588 8.60892L21.0567 9.41818C22.1378 11.2898 21.5223 13.677 19.685 14.7893Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M20.5884 8.60872C20.4885 8.45562 20.3947 8.29627 20.3135 8.13379L20.5884 8.60872Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M10.8862 14.7891H14.6419H14.8857" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M20.5881 8.6084C21.4567 9.95196 22.9721 10.8393 24.6906 10.8393H24.7937L23.7282 14.7888H19.6851" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M20.3159 8.1337V1.19092" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {% elif top_level_category == "Shoes" %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="18" viewBox="0 0 23 18" fill="none">
+                                <path d="M14.1232 5.44201C11.6235 8.25411 10.6862 11.2974 10.6862 11.2974C10.4612 11.7036 10.0331 11.9567 9.56756 11.9567H5.37439L1 16.9998H11.2111C13.0108 16.9998 13.467 16.0999 13.8826 14.9594C14.5481 13.1253 15.448 7.93854 18.96 7.93854L18.8163 16.9873L21.9346 16.9998V1.37695C19.1225 1.37695 16.6228 2.62678 14.1232 5.43889V5.44201Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        {% endif %}
+                        {{ top_level_category }}
+                    </div>  
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Second layer: Top-level categories buttons -->
+        <div id="Category2" class="tabcontent" data-top-category="">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+
+                <div style="display: flex; align-items: center;">
+                    <button class="back-button">
+                        <svg width="24" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; display: inline-block; padding-top: 6px; padding-bottom:9px; transform: rotate(90deg);">
+                            <path d="M26 12L16 22L6 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+                        </svg>
+                    </button>
+                    <!-- hiding this div, because the blue-dot appears by mistake on this text.. 
+                    <div id="#Category2" class="top_level_category">{{ top_level_category }}</div>
+                    -->
+                    <p class="top_level_category">{{ top_level_category }}</p>
+
+                </div>
+                
+             <!-- 'All' Toggle Button for Filters -->
+            <div style="display: flex; align-items: center;">
+                All
+                {% for top_level_category in unique_top_level_categories %}
+                <button class="dropdown-top-category button-toggle" 
+                        data-top-category="{{ top_level_category }}"
+                        data-category-ids="{% for category in category_names %}{% if category.top_level_category == top_level_category %}{{ category.id }},{% endif %}{% endfor %}">
+                    <div class="toggle-slider">
+                        <div class="toggle-circle"></div>
+                    </div>
+                </button>
+                {% endfor %}
+            </div>
+  
+            </div>
+
+            
+            <div class="category-grid">
+                {% for top_level_category in unique_top_level_categories %}
+                    {% if top_level_category == "Clothing" %}
+                        <!-- Special handling for Clothing with subgroups -->
+                        {% for subgroup_name, subgroup_categories in clothing_subgroups.items %}
+                            <div class="subgroup-label sub-category-title" data-top-category="Clothing">{{ subgroup_name }}</div>
+                            {% for category in category_names %}
+                                {% if category.top_level_category == "Clothing" and category.name in subgroup_categories %}
+                                    <button class="dropdown-category button-square" 
+                                            value="{{ category.id }}" 
+                                            data-top-category="{{ category.top_level_category }}"
+                                            data-subgroup="{{ subgroup_name }}"> 
+                                        {{ category.name }}
+                                    </button>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        <!-- Regular handling for ALL other categories (no subgroups) -->
+                        {% for category in category_names %}
+                            {% if category.top_level_category == top_level_category %}
+                                <button class="dropdown-category button-square" 
+                                        value="{{ category.id }}" 
+                                        data-top-category="{{ category.top_level_category }}"> 
+                                    {{ category.name }}
+                                </button>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+
+        <!-- Second layer: Size Buttons -->
+        <div id="Size" class="tabcontent" style="display: none;">
+            <div>
+                <div class="size_type clothing-size" data-category="size">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="20" viewBox="0 0 22 20" fill="none">
+                        <path d="M20.5127 5.3473L17.5225 8.33751L15.8634 6.67836V18.9767H5.03677V6.80022L3.49949 8.33751L0.509277 5.3473L3.39324 2.42583C4.04628 1.76342 4.93678 1.3916 5.86478 1.3916H7.07711C7.1271 2.65393 8.64876 3.66628 10.511 3.66628C12.3732 3.66628 13.8949 2.65393 13.9449 1.3916H15.0697C15.979 1.3916 16.8539 1.7478 17.5007 2.38834L20.5127 5.3473Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Clothing Size
+                </div>
+                <div class="size_type body-measurements" data-category="Body Measurements">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="19" viewBox="0 0 13 19" fill="none">
+                        <path d="M11.562 1H1.43848V18.1074H11.562V1Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M11.5615 15.1533H6.56836" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M11.5615 9.5H6.56836" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M11.5615 3.84717H6.56836" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M11.1909 12.3267H8.69287" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M11.1909 6.67383H8.69287" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Body Measurements
+                </div>
+                <div class="size_type shoe-size" data-category="Shoe Size">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="18" viewBox="0 0 23 18" fill="none">
+                        <path d="M14.1232 5.44201C11.6235 8.25411 10.6862 11.2974 10.6862 11.2974C10.4612 11.7036 10.0331 11.9567 9.56756 11.9567H5.37439L1 16.9998H11.2111C13.0108 16.9998 13.467 16.0999 13.8826 14.9594C14.5481 13.1253 15.448 7.93854 18.96 7.93854L18.8163 16.9873L21.9346 16.9998V1.37695C19.1225 1.37695 16.6228 2.62678 14.1232 5.43889V5.44201Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Shoe Size
+                </div>
+                <div class="size_type jewelry-size" data-category="Jewelry Size">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="26" viewBox="0 0 18 26" fill="none">
+                        <path d="M15.263 14.5397C16.3467 14.5397 17.2252 13.6612 17.2252 12.5775C17.2252 11.4938 16.3467 10.6152 15.263 10.6152C14.1793 10.6152 13.3008 11.4938 13.3008 12.5775C13.3008 13.6612 14.1793 14.5397 15.263 14.5397Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15.0355 18.82C16.1192 18.82 16.9977 17.9414 16.9977 16.8577C16.9977 15.774 16.1192 14.8955 15.0355 14.8955C13.9518 14.8955 13.0732 15.774 13.0732 16.8577C13.0732 17.9414 13.9518 18.82 15.0355 18.82Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M13.2132 22.9953C14.2969 22.9953 15.1754 22.1167 15.1754 21.033C15.1754 19.9493 14.2969 19.0708 13.2132 19.0708C12.1295 19.0708 11.251 19.9493 11.251 21.033C11.251 22.1167 12.1295 22.9953 13.2132 22.9953Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.17316 24.651C10.2569 24.651 11.1354 23.7725 11.1354 22.6888C11.1354 21.6051 10.2569 20.7266 9.17316 20.7266C8.08946 20.7266 7.21094 21.6051 7.21094 22.6888C7.21094 23.7725 8.08946 24.651 9.17316 24.651Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15.0286 10.2623C16.1123 10.2623 16.9909 9.38382 16.9909 8.30012C16.9909 7.21641 16.1123 6.33789 15.0286 6.33789C13.9449 6.33789 13.0664 7.21641 13.0664 8.30012C13.0664 9.38382 13.9449 10.2623 15.0286 10.2623Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M13.2078 6.08461C14.2915 6.08461 15.1701 5.20609 15.1701 4.12238C15.1701 3.03867 14.2915 2.16016 13.2078 2.16016C12.1241 2.16016 11.2456 3.03867 11.2456 4.12238C11.2456 5.20609 12.1241 6.08461 13.2078 6.08461Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.1673 4.43129C10.251 4.43129 11.1295 3.55277 11.1295 2.46906C11.1295 1.38535 10.251 0.506836 9.1673 0.506836C8.0836 0.506836 7.20508 1.38535 7.20508 2.46906C7.20508 3.55277 8.0836 4.43129 9.1673 4.43129Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3.07746 14.5397C4.16117 14.5397 5.03969 13.6612 5.03969 12.5775C5.03969 11.4938 4.16117 10.6152 3.07746 10.6152C1.99375 10.6152 1.11523 11.4938 1.11523 12.5775C1.11523 13.6612 1.99375 14.5397 3.07746 14.5397Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3.30598 10.2623C4.38968 10.2623 5.2682 9.38382 5.2682 8.30012C5.2682 7.21641 4.38968 6.33789 3.30598 6.33789C2.22227 6.33789 1.34375 7.21641 1.34375 8.30012C1.34375 9.38382 2.22227 10.2623 3.30598 10.2623Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.12678 6.08461C6.21048 6.08461 7.089 5.20609 7.089 4.12238C7.089 3.03867 6.21048 2.16016 5.12678 2.16016C4.04307 2.16016 3.16455 3.03867 3.16455 4.12238C3.16455 5.20609 4.04307 6.08461 5.12678 6.08461Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3.30891 18.82C4.39261 18.82 5.27113 17.9414 5.27113 16.8577C5.27113 15.774 4.39261 14.8955 3.30891 14.8955C2.2252 14.8955 1.34668 15.774 1.34668 16.8577C1.34668 17.9414 2.2252 18.82 3.30891 18.82Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.13019 22.9953C6.2139 22.9953 7.09242 22.1167 7.09242 21.033C7.09242 19.9493 6.2139 19.0708 5.13019 19.0708C4.04649 19.0708 3.16797 19.9493 3.16797 21.033C3.16797 22.1167 4.04649 22.9953 5.13019 22.9953Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.17316 24.651C10.2569 24.651 11.1354 23.7725 11.1354 22.6888C11.1354 21.6051 10.2569 20.7266 9.17316 20.7266C8.08946 20.7266 7.21094 21.6051 7.21094 22.6888C7.21094 23.7725 8.08946 24.651 9.17316 24.651Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Jewelry Size
+                </div>
+            </div>
+        </div>
+        
+        <!-- Second layer: Size Buttons -->
+        <div id="Size2" class="tabcontent" style="display: none;">
+            <div style="display: flex; align-items: center;">
+                <!-- Left-aligned Back Button -->
+                <div style="flex: 0 0 auto;">
+                    <button class="back-button-size">
+                        <svg width="24" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; display: inline-block; padding-top: 6px; padding-bottom:9px; transform: rotate(90deg);">
+                            <path d="M26 12L16 22L6 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="column-container">
+                <div class="buttons-size">
+                    <!-- Grouping 'size' and 'women_size' under 'Clothing Size' -->
+                    <div class="category-container" data-category="size">
+                        <div class="flex flex-wrap">
+                            <!-- Dynamically generate subcategories for Clothing Size -->
+                            {% for category, sizes in available_sizes.items %}
+                                {% if category|in_list:"size,bottoms_size,bra_size" %}
+                                    <div class="sub-category">
+                                        <div class="sub-category-title">{{ category_display_names|get_item:category }}</div>
+                                        <div class="flex flex-wrap">
+                                            {% for size in sizes %}
+                                                {% if size %}
+                                                    <button class="button-size button-square clothing-size" value="{{ size }}" data-category="{{ category }}">{{ size }}</button>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                              
+                            {% endfor %}
+                        </div>
+                    </div>
+        
+                    <!-- Body Measurements Categories -->
+                    <div class="category-container" data-category="Body Measurements">
+                        <p class="measurements-note-mobile caption1-regular">Measurements are in inches</p>
+                        <div class="flex flex-wrap">
+                            <!-- Dynamically generate subcategories for Body Measurements -->
+                            {% for category, sizes in available_sizes.items %}
+                                {% if category|in_list:"chest_size,waist_size,hip_size,inseam,shoulder_to_shoulder,waist_to_hem,shoulder_to_hem,hat_size" %}
+                                    <div class="sub-category">
+                                        <div class="sub-category-title">{{ category_display_names|get_item:category }}</div>
+                                        <div class="flex flex-wrap">
+                                            {% for size in sizes %}
+                                                {% if size %}
+                                                    <button class="button-size button-square body-measurements" value="{{ size }}" data-category="{{ category }}">{{ size|decimal_to_fraction }}</button>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            <p class="measurements-note-desktop caption1-regular">Measurements are in inches</p>
+                        </div>
+                    </div>
+        
+             
+                    <!-- Shoe Size Categories -->
+                    <div class="category-container" data-category="Shoe Size">
+                        <div class="flex flex-wrap">
+                            <!-- Dynamically generate subcategories for Shoe Size -->
+                            {% for category, sizes in available_sizes.items %}  
+                                {% if category|in_list:"us_shoe_size,shoe_size_width" %}
+                                    <div class="sub-category">
+                                        <div class="sub-category-title">{{ category_display_names|get_item:category }}</div>
+                                        <div class="flex flex-wrap">
+                                            {% for size in sizes %}
+                                                {% if size %}
+                                                    <button class="button-size button-square shoe-size" value="{{ size }}" data-category="{{ category }}" data-width="{{ shoe_size_width_mapping|get_item:size|join:',' }}">{{ size|get_shoe_width_label }}</button>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                        
+                    <!-- Jewelry Size Categories -->
+                    <div class="category-container" data-category="Jewelry Size">
+                        <div class="flex flex-wrap">
+                            <!-- Dynamically generate subcategories for Jewelry Size -->
+                            {% for category, sizes in available_sizes.items %}
+                                {% if category|in_list:"ring_size" %}
+                                    <div class="sub-category">
+                                        <div class="sub-category-title">{{ category_display_names|get_item:category }}</div>
+                                        <div class="flex flex-wrap">
+                                            {% for size in sizes %}
+                                                {% if size %}
+                                                    <button class="button-size button-square jewelry-size" value="{{ size }}" data-category="{{ category }}">{{ size }}</button>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <!-- Display these jewelry categories as fractions, decimal_to_fraction filter applied -->
+                                {% if category|in_list:"item_length,necklace_length" %}
+                                <div class="sub-category">
+                                    <div class="sub-category-title">{{ category_display_names|get_item:category }}</div>
+                                    <div class="flex flex-wrap">
+                                        {% for size in sizes %}
+                                            {% if size %}
+                                                <button class="button-size button-square jewelry-size" value="{{ size }}" data-category="{{ category }}">{{ size|decimal_to_fraction }}</button>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                
+
+        <div id="Color" class="tabcontent" style="padding-top: 2rem;">
+            <div class="justify-center">
+                <div class="buttons-color grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+                    {% for color in distinct_colors %}
+                    <button class="button-color flex flex-col items-center justify-center p-2 bg-transparent" value="{{ color }}">
+                        <span class="color-swatch {{ color|lower }} w-3/4 h-auto aspect-square bg-cover"  alt="{{ color }}"></span>
+                        <span class="caption1-regular mt-1">{{ color }}</span>
+                    </button>
+                    {% endfor %}     
+                </div>   
+            </div>
+        </div>
+
+        <div id="Price" class="tabcontent" style="padding-top: 2rem;">
+
+            <div class="inline-flex" style="max-width:224px;">
+                <input type="number" id="min-price" name="min-price" placeholder="$ Min" class="button-light" style="font-weight: 400; margin: 0 .5rem 0 0;">
+                <input type="number" id="max-price" name="max-price" placeholder="$ Max" class="button-light" style="font-weight: 400; margin: 0 .5rem 0 0;">
+
+                <!-- Uncomment if needed:
+                <button onclick="filterItems()" class="text-sm bg-stone-500 hover:bg-stone-700 text-white font-semi-bold py-2 px-4 w-full">Apply</button>
+                -->
+            </div>
+            <button id="reset-price-filter" class="reset-link">Reset</button>
+        </div>
+    </div>
+    <!-- End tabcontent -->  
+
+    <!-- RIGHT SIDE: Sort dropdown -->
+    <div style="position: absolute; right: 0; top: 0;">
+        <div class="flex items-center space-x-3">
+            <select id="dropdown-sortby" class="custom-select">
+                <option value="newlyAdded">Recent</option>
+                <option value="lowToHigh">Price low</option> 
+                <option value="highToLow">Price high</option>
+            </select>
+        </div>
+    </div>
+    
+</div> <!-- end menu container div -->
+
+
+<div class="flex flex-col md:flex-row justify-between pt-1">
+    <p style="text-transform: uppercase; letter-spacing: 0.04rem; opacity: 55%;" class="caption1-regular">{{ latest_timestamp }}</p>
+    <p style="margin: .25rem 0 .5rem 0; font-style: italic; opacity: 55%;" class="caption1-regular">Finde may earn commission from links</p>
+</div>
+
+<div id="no-results-message" class="pb-6" style="display: none;">
+<!-- dynamically render "No results found. Try fewer filters."-->
+</div>
+
+<!-- Featured Items Section -->
+<div id="featured-section" style="display: none;">
+    
+    <div class="flex text-left mb-4">
+        <p class="AdobeCaslonProRegular">Featured Items—</p>
+        <p class="AdobeCaslonProItalic-small"> 
+            Discover rare vintage pieces          
+        </p>
+    </div>
+    
+    <div id="featured-results" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-7">
+        <!-- Featured items will be rendered here -->
+    </div>
+
+    <!-- Divider line -->
+    <hr class="mb-8 mt-2 border-gray-300">
+
+</div>
+
+<div class="flex flex-col justify-center"> 
+    <div id="results" class="sort grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-7" {% if pdp_item_slug %}data-pdp-slug="{{ pdp_item_slug }}"{% endif %} >
+        <!-- dynamically render opensearch results with JS-->
+    </div>
+</div>
+
+<!-- PDP Modal -->
+<div class="pdp-modal" id="pdp-modal">
+    <div class="pdp-content">
+        <!-- desktop-only pdp close button -->
+        <button class="pdp-close" id="pdp-close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M7.05025 16.9497L16.9497 7.05017M16.9497 16.9497L7.05025 7.05017" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </button>
+
+        <!-- mobile-only pdp back button -->
+        <button class="pdp-back-mobile" id="pdp-back-mobile">
+            <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="padding-top: 3px; transform: rotate(90deg);">
+                <path d="M26 12L16 22L6 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+            </svg>
+        </button>
+
+        <div class="pdp-image-container">
+            <img class="pdp-image" id="pdp-image" src="" alt="">
+        </div>
+        <div class="pdp-details">
+
+            <h2 class="body-semibold" id="pdp-title" style="max-width:270px;"></h2>
+            <div class="body-semibold" id="pdp-brand-category" style="max-width:300px;"></div>
+            <div class="body-semibold" id="pdp-size"></div>
+            <div class="body-semibold" id="pdp-price" style="padding-bottom:.5rem;"></div>
+
+            <div style="display: flex; gap: 8px; padding-bottom: .5rem;">
+                <div id="pdp-favorite-container">
+                    <!-- The favorite button will be inserted here -->
+                </div>
+
+                <!-- Pinterest -->
+                <div id="pdp-pinterest-container">
+                    <!-- Pinterest button will be inserted here dynamically -->
+                </div>
+            </div>
+
+            <div class="pdp-description" id="pdp-description"></div>
+
+            <button class="button-dark" style="margin: 1rem 0 2rem 0; width: 100%;" id="pdp-cta">View on eBay</button>
+            <div class="pdp-measurements" id="pdp-measurements"></div>                
+            <!-- Add detailed measurements section -->
+            <div class="pdp-detailed-measurements" id="pdp-detailed-measurements">
+                <h4>Measurements</h4>
+                <div class="measurements-grid" id="measurements-grid"></div>
+            </div> 
+
+        </div>
+    </div>
+</div>
+
+<div id="pagination" class="pagination">
+    <!-- Pagination buttons will be dynamically added here -->
+</div>
+
+{{ category_names|json_script:"category-names-data" }}
+{{ curated_filters|json_script:"curated-filters-data" }}
+<script>
+    // item category in item container listing info
+    window.CATEGORY_NAMES = JSON.parse(document.getElementById('category-names-data').textContent);
+    window.CURATED_FILTERS = JSON.parse(document.getElementById('curated-filters-data').textContent);
+
+    window.HASHED_BROWSE_PATH = "{% static 'js/browse.js' %}";
+
+</script>
+
+<script type="module" src="{% static 'js/browse.js' %}"></script>
+<script type="module" src="{% static 'js/search_input.js' %}"></script>
+
+<script>
+    var opensearchUrl = "{% url 'core:opensearch_results' %}";  // Correctly generated URL from Django template
+</script>
+
+{% if pdp_item %}
+{{ pdp_item|json_script:"pdp-item-data" }}
+{% endif %}
+
+{% if pdp_item_not_found %}
+<div data-pdp-not-found="true" style="display: none;"></div>
+{% endif %}
+
+<!-- PDP URL script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resultsContainer = document.getElementById('results');
+    const pdpSlug = resultsContainer ? resultsContainer.getAttribute('data-pdp-slug') : null;
+
+    if (pdpSlug) {
+        let attemptCount = 0;
+        const maxAttempts = 30;
+        
+        function findAndOpenPDP() {
+            attemptCount++;
+            const itemElements = document.querySelectorAll('.item-container');
+            
+            if (itemElements.length > 0) {
+                const baseSlug = pdpSlug.replace(/_\d+$/, '').toLowerCase();
+                
+                for (let element of itemElements) {
+                    const itemTitle = element.dataset.title;
+                    if (itemTitle) {
+                        const titleSlug = itemTitle.toLowerCase()
+                            .replace(/[^a-z0-9\s-]/g, '')
+                            .replace(/\s+/g, '_')
+                            .replace(/_+/g, '_');
+                        
+                        if (titleSlug === baseSlug) {
+                            const anchor = element.querySelector('a');
+                            if (anchor) {
+                                anchor.click();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (attemptCount < maxAttempts) {
+                setTimeout(findAndOpenPDP, 500);
+            }
+        }
+        
+        setTimeout(findAndOpenPDP, 1000);
+    }
+});
+</script>
+
+{% endblock %}

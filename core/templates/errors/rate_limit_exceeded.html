@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+{% block content %}
+    <div class="container">
+        <h1>Too Many Requests</h1>
+        <p>It looks like you've made too many requests in a short period. Please try again later.</p>
+        <br>
+        <a href="{{ previous_url }}"><strong>Go Back</strong></a> <!-- Link back to the original form -->
+        <br>
+    </div>
+{% endblock %}

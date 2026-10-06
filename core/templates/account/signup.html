@@ -1,0 +1,125 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="mx-auto" style="max-width:320px;">
+
+    <h1 style="text-align: center; margin-bottom: 1rem;">Welcome to Finde</h1>
+
+    {% load socialaccount %}
+    <div style="padding-bottom: 1rem;">
+        <!-- IMPORTANT: must be an <a></a> link, not a <button></button> in order to work -->
+        <a href="{% url 'google_login' %}" class="button-light" style="width:100%;">
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 48 48" class="mr-2"><g><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></g></svg>Continue With Google
+        </a>
+    </div>
+
+    <div class="divider-wrapper" style="padding-bottom: 1rem;"><span class="divider">Or</span></div>
+
+    
+    <form method="post" action=".">
+        {% csrf_token %}
+        
+        <div class="{% if form.email.errors %}has-error{% endif %}">
+            <label class="inline-block">Email</label><br>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="text-red-500" style="margin: -1rem 0 .5rem 0 !important; font-size: .75rem;">
+                    {{ form.email.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div id="password1" class="{% if form.password1.errors %}has-error{% endif %}">
+            <label class="inline-block">Password</label><br>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+            <div class="text-red-500" style="margin: -1rem 0 .5rem 0 !important; font-size: .75rem;">
+                    {{ form.password1.errors }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div id="password2-container" class="{% if form.password2.errors %}has-error{% endif %}" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
+            <label class="inline-block">Repeat Password</label><br>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+                <div class="text-red-500" style="margin: -1rem 0 .5rem 0 !important; font-size: .75rem;">
+                    {{ form.password2.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <p class="text-xs">By signing up, you agree to our <a href="/tos/#terms" style="text-decoration:underline;" target="_blank" rel="noopener noreferrer">Terms of Service</a> & <a href="/tos/#privacy-policy" style="text-decoration:underline;" target="_blank" rel="noopener noreferrer">Privacy Policies</a>.</p>
+
+        <br>
+
+        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+
+        <!-- IMPORTANT: must stay coupled within the <form></form> in order for log in button to work-->
+        <button type="submit" style="width: 100%; margin: .5rem 0 1.5rem 0;" class="button-dark inactive" disabled>
+            <span class="spinner" aria-hidden="true"></span> <!-- Loading spinner -->
+            Sign Up
+        </button>
+    </form>
+
+    <div class="grid gap-5">
+
+        <p style="text-align: center;">Already have an account? <a href="{% url 'account_login' %}" style="color:rgb(0, 115, 255)">Log In</a></p>
+
+    
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const password1Input = document.querySelector('input[name="password1"]');
+        const password2Container = document.getElementById('password2-container');
+
+        const password2HasError = password2Container.classList.contains('has-error');
+
+        // Show password2 immediately if there was an error (e.g. password mismatch)
+        if (password2HasError) {
+            password2Container.style.display = 'block';
+            setTimeout(() => {
+                password2Container.style.opacity = '1';
+            }, 10);
+        }
+
+        if (password1Input && password2Container) {
+            password1Input.addEventListener('focus', function() {
+                password2Container.style.display = 'block';
+                setTimeout(() => {
+                    password2Container.style.opacity = '1';
+                }, 10);
+            });
+
+            password1Input.addEventListener('input', function() {
+                if (this.value !== '') {
+                    password2Container.style.display = 'block';
+                    setTimeout(() => {
+                        password2Container.style.opacity = '1';
+                    }, 10);
+                } else if (!password2HasError) {
+                    // Only hide it if no error is present
+                    password2Container.style.opacity = '0';
+                    setTimeout(() => {
+                        password2Container.style.display = 'none';
+                    }, 300);
+                }
+            });
+        }
+    });
+</script>
+
+
+
+{% endblock %}
+
+
+{% block recaptcha %}
+    <script src="https://www.google.com/recaptcha/api.js?render=6LeomTgqAAAAAMtjzmmPKW3Lf14A8T_80DojiJB7"></script>
+    {{ block.super }} <!-- This will include the reCAPTCHA script from base.html -->
+{% endblock recaptcha %}

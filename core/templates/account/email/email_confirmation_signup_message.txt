@@ -1,0 +1,16 @@
+Hello from Finde!
+
+Thank you for signing up with Finde! To complete your registration and start using your account, please confirm your email address.
+
+To confirm your email address, please click the link below:
+{{ activate_url }}
+
+If you did not register for this account, you can safely ignore this email.
+
+Thank you for joining Finde!
+- The Finde Team
+
+---
+Finde
+www.finde.clothing
+hello@finde.clothing

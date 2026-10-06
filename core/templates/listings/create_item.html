@@ -1,0 +1,3947 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+<title>{% block title %}Create Listing{% endblock %} | Curated Vintage Clothing & Accessories</title>
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Listing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #navbar, .bottomnav-container {
+            display: none;
+        }
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #9ca3af;
+            background-color: #f9fafb;
+        }
+        .image-preview {
+            position: relative;
+            overflow: hidden;
+        }
+        .remove-btn {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .dots-menu {
+            position: relative;
+        }
+        .dots-popover {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 4px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 9999;
+            min-width: 120px;
+            display: none;
+            overflow: visible;
+        }
+        .dots-popover.active {
+            display: block;
+        }
+        .dots-popover button {
+            width: 100%;
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #374151;
+            transition: background 0.2s;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            display: block;
+        }
+        .dots-popover button:hover {
+            background: #f3f4f6;
+        }
+        .dots-popover button.delete-option {
+            color: #48110C
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 400px;
+            margin: 0 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+      /* Category Overlay Styles - White Theme */
+        .category-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .category-overlay.active {
+            display: flex;
+        }
+        .category-modal {
+            background: white;
+            color: #1f2937;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .category-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; 
+        }
+        .category-header button {
+            color: #48110C;
+            transition: color 0.2s;
+        }
+        .category-header button:hover {
+            color: #374151;
+        }
+        .category-search {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .category-search input {
+            width: 100%;
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #1f2937;
+            font-size: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .category-search input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .category-search input::placeholder {
+            color: #9ca3af;
+        }
+        .category-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .category-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s;
+        }
+        .category-item:hover {
+            background-color: #f9fafb;
+        }
+        .category-item:last-child {
+            border-bottom: none;
+        }
+        .category-item.has-children::after {
+            content: "›";
+            font-size: 18px;
+            color: #9ca3af;
+        }
+        .breadcrumb {
+            padding: 12px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+        .breadcrumb-item {
+            cursor: pointer;
+            color: #3b82f6;
+            transition: color 0.2s;
+        }
+        .breadcrumb-item:hover {
+            text-decoration: underline;
+            color: #2563eb;
+        }
+        .breadcrumb-item:last-child {
+            color: #48110C;
+            cursor: default;
+        }
+        .breadcrumb-item:last-child:hover {
+            text-decoration: none;
+            color: #48110C;
+        }
+        .search-results {
+            padding: 8px 0;
+        }
+        .search-result-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.2s;
+        }
+        .search-result-item:hover {
+            background-color: #f9fafb;
+        }
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        .search-result-name {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        .search-result-path {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Current category highlighting for white theme */
+        .category-item.current-category {
+            background-color: rgba(59, 130, 246, 0.1) !important;
+            border: 1px solid #3b82f6 !important;
+            border-radius: 4px !important;
+            position: relative;
+            margin: 2px 8px;
+            padding: 11px 19px; /* Adjust padding to account for border */
+        }
+
+        .category-item.current-category::after {
+            content: "✓";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #3b82f6;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .category-item.current-category.has-children::after {
+            content: "✓ ›";
+            color: #3b82f6;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Existing crop popup styles... */
+        .popup-crop-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-crop-overlay.active {
+            display: flex;
+        }
+
+        .popup-content {
+            background: white;
+            max-height: 594px;
+            border-radius: 20px;
+            overflow-y: auto;
+            animation: subtleEntry 0.2s ease-out;
+            position: relative;
+            transform-origin: center center;
+        }
+
+        @keyframes subtleEntry {
+            from { 
+                opacity: 0;
+                transform: scale(0.98);
+            }
+            to { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .popup-image-container {
+            padding: 32px 32px 8px 32px;
+        }
+
+        .crop-image-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 256px;
+            margin: 0 auto;
+            aspect-ratio: 3/4;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .crop-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .crop-tools {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            padding: 0px 0px 16px 0px;
+            background: white;
+        }
+
+        .popup-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #E4DBD6;
+        }
+
+        .popup-actions .button-dark { /* override button-dark main.css */
+            margin: 0px;
+        }
+
+       /* Updated popup-thumbnail styles */
+        .popup-thumbnail {
+            margin: 0px auto;
+            max-width: 304px;
+            padding: 0 6px 24px 6px;
+            background: white;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        @media (max-width: 768px) {
+            .popup-thumbnail {
+                padding: 0 0 24px 16px;
+            }
+        }
+
+        /* Carousel container */
+        .thumbnail-carousel {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+ 
+        /* Scrollable thumbnails container */
+        .thumbnails-scroll-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            flex: 1;
+            padding: 8px 0 0 0;
+            
+            /* White gradient fade */
+            mask: linear-gradient(to right, black 0%, black 95%, transparent 100%);
+            -webkit-mask: linear-gradient(to right, black 0%, black 95%, transparent 100%);
+        }
+
+        /* Hide scrollbar for WebKit browsers */
+        .thumbnails-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Navigation arrows */
+        .carousel-nav {
+            display: none;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: .375rem;
+            width: 32px;
+            height: 32px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .carousel-nav:hover {
+            background: #dacfc862;
+        }
+
+        .carousel-nav.disabled {
+            opacity: 0;
+            cursor: not-allowed;
+        }
+
+        .carousel-nav svg {
+            width: 16px;
+            height: 16px;
+            stroke: #333;
+            stroke-width: 2;
+        }
+
+        /* Show navigation on desktop when there are more than 3 items */
+        @media (min-width: 768px) {
+            .thumbnail-carousel.has-overflow .carousel-nav {
+                display: flex;
+            }
+        }
+
+        /* Mobile touch improvements */
+        @media (max-width: 767px) {
+            .thumbnails-scroll-container {
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+                /* On mobile, extend the fade to cover more area since no nav arrows */
+                mask: linear-gradient(to right, black 0%, black 80%, transparent 100%);
+                -webkit-mask: linear-gradient(to right, black 0%, black 80%, transparent 100%);
+            }
+            
+            /* Remove the pseudo-element fade on mobile in favor of mask */
+            .thumbnail-carousel::after {
+                display: none;
+            }
+        }
+
+        /* Ensure thumbnails don't shrink */
+        .thumbnail-preview,
+        .add-photo-btn {
+            flex-shrink: 0;
+        }
+
+        .thumbnail-preview {
+            aspect-ratio: 3/4;
+            width: 40px;
+            border-radius: 8px;
+            background: #f0f0f0;
+        }
+
+        .thumbnail-preview img {
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .add-photo-btn {
+            aspect-ratio: 3/4;
+            width: 40px;
+            border: 1px solid #E4DBD6;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-photo-btn:hover, .add-photo-main-btn:hover {
+            background: #E4DBD6;
+        }
+
+        .button-square {  /* override main.css styles */
+            min-width:0px;
+            border: 0px;
+            margin: 0px;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .grid-overlay.active {
+            opacity: 1;
+        }
+
+        .grid-line-horizontal {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .grid-line-vertical {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+                
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-md mx-auto bg-gray-100 min-h-screen">
+        <!-- Header -->
+        <div class="bg-gray-200 px-4 py-3 flex items-center justify-between">
+            <button onclick="goBack()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <span class="text-sm font-medium">Create Listings</span>
+            <button onclick="closeModal()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Main listings container -->
+        <div id="listings-container" class="pb-12 pt-4 space-y-4">
+            <!-- Listing cards will be rendered here -->
+        </div>
+
+        <!-- Add button -->
+        <div class="flex justify-center">
+            <button id="add-listing-button" onclick="addNewListing()" class="bg-white border-2 border-gray-300 rounded-full p-3" style="display: none;">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Bottom buttons -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
+            <div class="max-w-md mx-auto flex gap-3">
+                <button onclick="showCancelConfirmation()" class="flex-1  button-light">
+                    Cancel
+                </button>
+                <button onclick="submitListings()" class="flex-1 button-dark">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Selection Overlay -->
+    <div id="category-overlay" class="category-overlay">
+        <div class="category-modal">
+            <div class="category-header">
+                <button onclick="closeCategoryOverlay()" class="text-white hover:text-gray-300">
+                    Done
+                </button>
+            </div>
+            
+            <div class="category-search">
+                <input type="text" 
+                       id="category-search-input" 
+                       placeholder="Category earch" 
+                       oninput="handleCategorySearch(this.value)">
+            </div>
+            
+            <div id="category-breadcrumb" class="breadcrumb" style="display: none;">
+                <!-- Breadcrumb will be populated dynamically -->
+            </div>
+            
+            <div class="category-content">
+                <div id="category-loading" class="loading-spinner" style="display: none;">
+                    <div class="spinner"></div>
+                </div>
+                <div id="category-list">
+                    <!-- Categories will be populated here -->
+                </div>
+                <div id="search-results" class="search-results" style="display: none;">
+                    <!-- Search results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Confirmation Modal -->
+    <div id="cancel-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Cancel Creating Listings?</h3>
+            <p class="text-gray-600 mb-6">All unsaved changes and uploaded images will be deleted. This action cannot be undone.</p>
+            <div class="flex gap-3">
+                <button onclick="closeCancelModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    Keep Editing
+                </button>
+                <button onclick="confirmCancel()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                    Discard Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crop Popup Overlay (keeping existing crop functionality) -->
+    <div class="popup-crop-overlay" id="cropPopup">
+        <!-- Existing crop popup content... -->
+        <div class="popup-content">
+            <div class="popup-image-container">
+                <div class="crop-image-wrapper">
+                    <img src="" alt="Item image" id="cropImage">
+                    <div id="gridOverlay" class="grid-overlay"></div>
+                </div>
+                <button class="crop-popup-close-btn" onclick="saveCrop()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="crop-tools">
+                <button class="button-square" id="zoomToggleBtn" onclick="toggleZoomSlider()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+                        <path d="M7.61844 14.6343C11.2737 14.6343 14.2369 11.6712 14.2369 8.0159C14.2369 4.36064 11.2737 1.39746 7.61844 1.39746C3.96318 1.39746 1 4.36064 1 8.0159C1 11.6712 3.96318 14.6343 7.61844 14.6343Z" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12.3047 12.6924L19.9998 20.397" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7.61816 5.31787V10.7076" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4.92041 8.0127H10.3133" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button class="button-square" id="rotateBtn" onclick="toggleRotationSlider()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="22" viewBox="0 0 26 22" fill="none">
+                        <path d="M2.5 10.0894C2.77614 10.0894 3 10.3132 3 10.5894C3 10.8655 2.77614 11.0894 2.5 11.0894H1C0.723858 11.0894 0.5 10.8655 0.5 10.5894C0.5 10.3132 0.723858 10.0894 1 10.0894H2.5ZM8.5 10.0894C8.77614 10.0894 9 10.3132 9 10.5894C9 10.8655 8.77614 11.0894 8.5 11.0894H5.5C5.22386 11.0894 5 10.8655 5 10.5894C5 10.3132 5.22386 10.0894 5.5 10.0894H8.5ZM14.5 10.0894C14.7761 10.0894 15 10.3132 15 10.5894C15 10.8655 14.7761 11.0894 14.5 11.0894H11.5C11.2239 11.0894 11 10.8655 11 10.5894C11 10.3132 11.2239 10.0894 11.5 10.0894H14.5ZM20.5 10.0894C20.7761 10.0894 21 10.3132 21 10.5894C21 10.8655 20.7761 11.0894 20.5 11.0894H17.5C17.2239 11.0894 17 10.8655 17 10.5894C17 10.3132 17.2239 10.0894 17.5 10.0894H20.5ZM25 10.0894C25.2761 10.0894 25.5 10.3132 25.5 10.5894C25.5 10.8655 25.2761 11.0894 25 11.0894H23.5C23.2239 11.0894 23 10.8655 23 10.5894C23 10.3132 23.2239 10.0894 23.5 10.0894H25Z" fill="black"/>
+                        <path d="M22.4271 8.14603L23.25 5.10406L7.04097 1L5.10791 8.14603" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3.79148 13.0078L2.79883 16.6852L19.0078 20.7893L21.1107 13.0109" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button class="button-square" onclick="turnImage()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 21 20" fill="none">
+                        <path d="M19.9999 13.4947L18.0444 11.6802C18.0444 15.845 14.6661 19.2233 10.5013 19.2233C7.70905 19.2233 5.27095 17.7065 3.96729 15.4533" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15.4937 13.1935L18.0446 11.6768" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M1 6.72861L2.9555 8.54308C2.9555 4.37825 6.33375 1 10.4986 1C13.2971 1 15.7414 2.52617 17.042 4.78878" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.60315 7.0293L2.95508 8.54293" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button class="button-square" onclick="enhanceImage()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 23 23" fill="none">
+                        <path d="M16.6889 3.98153L3.98096 16.6895L6.31921 19.0277L19.0271 6.31979L16.6889 3.98153Z" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15.2338 10.0101L13.0146 7.79102" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.02566 1C5.02566 3.22537 3.22224 5.02566 1 5.02566" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.05447 5.02566C6.82911 5.02566 5.02881 3.22224 5.02881 1" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.02881 9.05447C5.02881 6.82911 6.83223 5.02881 9.05447 5.02881" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M1 5.02881C3.22537 5.02881 5.02566 6.83223 5.02566 9.05447" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17.9715 13.9458C17.9715 16.1712 16.168 17.9715 13.9458 17.9715" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21.9998 17.9715C19.7744 17.9715 17.9741 16.168 17.9741 13.9458" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17.9741 22.0003C17.9741 19.7749 19.7775 17.9746 21.9998 17.9746" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M13.9458 17.9746C16.1712 17.9746 17.9715 19.778 17.9715 22.0003" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="popup-thumbnail">
+                <div class="thumbnail-carousel" id="thumbnailCarousel">
+                    <!-- Left navigation arrow -->
+                    <button class="carousel-nav carousel-nav-left" id="carouselLeft" onclick="scrollThumbnails('left')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Scrollable thumbnails container -->
+                    <div class="thumbnails-scroll-container" id="thumbnailsContainer">
+                        <div id="popup-thumbnails-container" style="display: flex; gap: 14px; padding-right: 25px;">
+                            <!-- Will be populated dynamically -->
+                        </div>
+
+                    </div>
+                    
+                    <!-- Right navigation arrow -->
+                    <button class="carousel-nav carousel-nav-right" id="carouselRight" onclick="scrollThumbnails('right')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+
+            </div>
+
+            <div class="popup-actions">
+                <button class="button-light" onclick="revertImage()">Revert</button>
+                <button class="button-dark" onclick="saveCrop()">Done</button>
+            </div>
+
+            <!-- ZOOM SLIDER OVERLAY -->
+            <div id="zoomSliderOverlay" class="zoom-slider-overlay">
+                <button class="overlay-close-btn" onclick="toggleZoomSlider()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="zoom-slider-container">
+                    <div class="zoom-slider-track">
+                        <input type="range" 
+                            id="zoomSlider" 
+                            class="zoom-slider" 
+                            min="100" 
+                            max="300" 
+                            value="100" 
+                            oninput="handleZoomSlider(this.value)">
+                        <div class="zoom-value" id="zoomValue">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROTATION SLIDER OVERLAY -->
+            <div id="rotationSliderOverlay" class="rotation-slider-overlay">
+                <button class="overlay-close-btn" onclick="toggleRotationSlider()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="rotation-slider-container">
+                    <div class="rotation-slider-track">
+                        <input type="range" 
+                            id="rotationSlider" 
+                            class="rotation-slider" 
+                            min="-180" 
+                            max="180" 
+                            value="0" 
+                            oninput="handleRotationSlider(this.value)">
+                        <div class="rotation-value" id="rotationValue">0°</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ fashion_data|json_script:"fashion-data" }}
+    <script>
+        // Simplified state management
+        let listings = [];
+        let nextListingId = 0;
+        let categoryCache = null;
+        let currentCategoryPath = [];
+        let searchTimeout = null;
+        let currentEditingListingId = null;
+        let pendingCropChanges = {}; // Store pending changes before committing
+        let sessionCropData = {}; // Current session's crop data
+
+        // Configuration - now simplified since we get data from backend
+        window.FASHION_DATA = JSON.parse(document.getElementById('fashion-data').textContent);
+        const DETECTION_TO_SEMANTIC = FASHION_DATA.detection_mappings;
+
+        // Updated Listing class - much simpler now
+        class Listing {
+            constructor(config = {}) {
+                this.id = config.id !== undefined ? config.id : nextListingId++;
+                this.images = config.images || [];
+                this.category = config.category || '';
+                this.categoryPath = config.categoryPath || '';
+                this.categoryDisplayName = config.categoryDisplayName || '';
+                this.description = config.description || '';
+                this.csvFile = config.csvFile || null;
+                this.imageId = config.imageId || null;
+                this.batchId = config.batchId || Date.now().toString();
+                this.detectionData = config.detectionData || null;
+                this.cropSettings = config.cropSettings || {};
+                this.hiddenImages = config.hiddenImages || [];
+            }
+
+            async uploadImage(file) {
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('batch_id', this.batchId);
+                
+                try {
+                    const response = await fetch('/api/upload-temp-image/', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.images.push({
+                            id: data.image_id,
+                            name: file.name,
+                            workingUrl: data.working_url,
+                            file: file
+                        });
+                        this.imageId = data.image_id;
+                        saveListings();
+                        return data;
+                    }
+                } catch (error) {
+                    console.error('Upload failed:', error);
+                }
+                return null;
+            }
+
+            async detectFashion(files) {
+                const formData = new FormData();
+                
+                if (Array.isArray(files)) {
+                    files.forEach((file, index) => {
+                        formData.append(`image_${index}`, file);
+                        if (this.images[index] && this.images[index].id) {
+                            formData.append(`image_id_${index}`, this.images[index].id);
+                        }
+                    });
+                } else {
+                    formData.append('image', files);
+                    if (this.imageId) {
+                        formData.append('image_id', this.imageId);
+                    }
+                }
+                
+                try {
+                    const response = await fetch('/api/test-fashion-detection/', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    this.detectionData = data;
+                    
+                    if (data.is_multi_image && data.unique_items) {
+                        if (data.unique_items.length > 1) {
+                            return { multipleDetected: true, data: data };
+                        } else if (data.unique_items.length === 1) {
+                            const detected = data.unique_items[0];
+                            this.updateCategoryFromDetection(detected);
+                            saveListings();
+                            return { multipleDetected: false, data: data };
+                        }
+                    } else if (data.detected_objects && data.detected_objects.length > 1) {
+                        return { multipleDetected: true, data: data };
+                    } else if (data.detected_objects && data.detected_objects.length === 1) {
+                        const detected = data.detected_objects[0];
+                        this.updateCategoryFromDetection(detected);
+                        saveListings();
+                        return { multipleDetected: false, data: data };
+                    }
+                    
+                    saveListings();
+                    return { multipleDetected: false, data: data };
+                    
+                } catch (error) {
+                    console.error('Detection failed:', error);
+                    return { 
+                        multipleDetected: false, 
+                        error: error.message || 'Detection failed',
+                        data: null 
+                    };
+                }
+            }
+
+            updateCategoryFromDetection(detected) {
+                const detectedCategory = detected.category?.toLowerCase();
+                
+                // Map to semantic path using simplified mapping
+                const semanticPath = this.mapDetectionToSemantic(detectedCategory);
+                this.setCategoryFromPath(semanticPath);
+                
+                console.log(`Detected: ${detectedCategory} → Path: ${semanticPath} → Display: ${this.categoryDisplayName}`);
+            }
+
+            mapDetectionToSemantic(detectedCategory) {
+                if (!detectedCategory) return 'clothing.tops.tees';
+                
+                const term = detectedCategory.toLowerCase().trim();
+                
+                // Try exact match
+                if (DETECTION_TO_SEMANTIC[term]) {
+                    return DETECTION_TO_SEMANTIC[term];
+                }
+                
+                // Try partial matches
+                for (const [key, path] of Object.entries(DETECTION_TO_SEMANTIC)) {
+                    if (term.includes(key) || key.includes(term)) {
+                        return path;
+                    }
+                }
+                
+                return 'clothing.tops.tees'; // default fallback
+            }
+
+            setCategoryFromPath(path) {
+                this.categoryPath = path;
+                // We'll get the display name from the backend when needed
+                this.categoryDisplayName = this.formatCategoryPath(path);
+            }
+
+            formatCategoryPath(path) {
+                return path.split('.').map(part => 
+                    part.replace(/_/g, ' ').replace(/-/g, ' ')
+                    .split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+                ).join(' > ');
+            }
+
+            render() {
+                const idPrefix = `listing-${this.id}`;
+                const mainImage = this.images[0];
+                const popoverId = `dots-popover-${this.id}`;
+                
+                return `
+                    <div class="bg-white rounded-2xl p-6 shadow-sm" data-listing-id="${this.id}">
+                        
+                        <!-- Three dots menu -->
+                        <div class="flex justify-end mb-6">
+                            <div class="dots-menu">
+                                <button onclick="toggleDotsMenu(${this.id})" class="flex space-x-2 p-2 rounded-lg transition-colors">
+                                    <div class="w-2 h-2 bg-red-800 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-red-800 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-red-800 rounded-full"></div>
+                                </button>
+                                <div id="${popoverId}" class="dots-popover" onclick="event.stopPropagation()">
+                                    <button onclick="deleteListing(${this.id}); event.stopPropagation();" class="delete-option">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status messages container -->
+                        <div id="status-container-${this.id}"></div>
+
+                        <!-- Image section -->
+                        ${mainImage ? this.renderImageThumbnails(mainImage) : this.renderUploadAreas()}
+
+                        <!-- Category dropdown (only if detected) -->
+                        ${this.detectionData ? this.renderCategorySection(idPrefix) : ''}
+
+                        <!-- Description -->
+                        <div class="relative">
+                            <textarea id="${idPrefix}-description" 
+                                placeholder="Describe item" 
+                                onchange="updateListing(${this.id}, 'description', this.value)"
+                                class="w-full p-4 border border-gray-300 rounded-2xl resize-none h-24 text-gray-800 placeholder-gray-500">${this.description}</textarea>
+                            <button class="absolute bottom-3 right-3 p-2">
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500 mb-6">
+                            Mention any damage, style, era, tag size, brand, material
+                        </div>
+
+                    </div>
+                `;
+            }
+
+            renderCategorySection(idPrefix) {
+                return `
+                    <div class="mb-6">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Category</label>
+                        
+                        <button type="button" 
+                                onclick="openCategorySelector(${this.id})"
+                                class="w-full p-3 border border-gray-300 rounded-lg text-left text-sm bg-white hover:bg-gray-50 transition-colors flex items-center justify-between">
+                            <span class="text-gray-900">
+                                ${this.categoryDisplayName || 'Select category...'}
+                            </span>
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                       
+                    </div>
+                `;
+            }
+
+            renderUploadAreas() {
+                return `
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <!-- Images upload -->
+                        <div class="upload-area rounded-lg p-4 text-center">
+                            <input type="file" multiple accept="image/*" 
+                                id="image-upload-${this.id}" 
+                                class="hidden" 
+                                onchange="handleImageUpload(event, ${this.id})">
+                            <label for="image-upload-${this.id}" class="cursor-pointer">
+                                <div class="text-gray-600 text-sm font-medium">upload images</div>
+                                <div class="text-gray-500 text-xs">(up to 9)</div>
+                            </label>
+                        </div>
+
+                        <!-- CSV upload -->
+                        <div class="upload-area rounded-lg p-4 text-center">
+                            <input type="file" accept=".csv" 
+                                id="csv-upload-${this.id}" 
+                                class="hidden" 
+                                onchange="handleCsvUpload(event, ${this.id})">
+                            <label for="csv-upload-${this.id}" class="cursor-pointer">
+                                <div class="text-gray-600 text-sm font-medium">CSV file</div>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderImageThumbnails(mainImage) {
+                const mainCropSettings = this.cropSettings && this.cropSettings[0];
+                const mainImageStyle = this.getImageStyleFromCropSettings(mainCropSettings, 88);
+                
+                // Only show add button if we have less than 4 images
+                const showAddButton = this.images.length < 4;
+                
+                // Show main image + up to 1 additional image on mobile (2 total), up to 2 additional on desktop (3 total)
+                const displayImages = this.images.slice(1, 3);
+                
+                return `
+                    <div class="main-thumb flex gap-3 mb-4">
+                        <div class="relative cursor-pointer" 
+                            data-image-index="0"
+                            onclick="openCropPopup(this, ${this.id}, 0)">
+                            <div class="bg-gray-100 rounded-lg overflow-hidden hover:opacity-90 transition-opacity" 
+                                style="width: 88px; height: 118px; position: relative;">
+                                <div class="absolute inset-0 flex items-center justify-center" style="overflow: hidden;">
+                                    <img src="${mainImage.workingUrl}" 
+                                        style="${mainImageStyle}" 
+                                        alt="Main">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Show only first additional image on mobile, both on desktop -->
+                        ${displayImages.slice(0, 1).map((img, index) => {
+                            const cropSettings = this.cropSettings && this.cropSettings[index + 1];
+                            const imageStyle = this.getImageStyleFromCropSettings(cropSettings);
+                            return `
+                                <div class="relative cursor-pointer" 
+                                    data-image-index="${index + 1}"
+                                    onclick="openCropPopup(this, ${this.id}, ${index + 1})">
+                                    <div class="bg-gray-100 rounded-lg overflow-hidden hover:opacity-90 transition-opacity" 
+                                        style="width: 88px; height: 118px; position: relative;">
+                                        <div class="absolute inset-0 flex items-center justify-center" style="overflow: hidden;">
+                                            <img src="${img.workingUrl}" 
+                                                style="${imageStyle}" 
+                                                alt="Additional">
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                        
+                        <!-- Second additional image - hidden on mobile -->
+                        ${displayImages.length > 1 ? `
+                            <div class="relative cursor-pointer hidden md:block" 
+                                data-image-index="2"
+                                onclick="openCropPopup(this, ${this.id}, 2)">
+                                <div class="bg-gray-100 rounded-lg overflow-hidden hover:opacity-90 transition-opacity" 
+                                    style="width: 88px; height: 118px; position: relative;">
+                                    <div class="absolute inset-0 flex items-center justify-center" style="overflow: hidden;">
+                                        <img src="${displayImages[1].workingUrl}" 
+                                            style="${this.getImageStyleFromCropSettings(this.cropSettings && this.cropSettings[2])}" 
+                                            alt="Additional">
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- More images indicator - shows different counts for mobile vs desktop -->
+                        ${this.images.length > 2 ? `
+                            <div class="bg-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors md:hidden"
+                                style="width: 88px; height: 118px;"
+                                onclick="openCropPopup(this.closest('.bg-white'), ${this.id}, 2)">
+                                <div class="text-center">
+                                    <div class="text-gray-600 font-medium text-sm">+${this.images.length - 2}</div>
+                                    <div class="text-gray-500 text-xs">more</div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${this.images.length > 3 ? `
+                            <div class="bg-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors hidden md:flex"
+                                style="width: 88px; height: 118px;"
+                                onclick="openCropPopup(this.closest('.bg-white'), ${this.id}, 0)">
+                                <div class="text-center">
+                                    <div class="text-gray-600 font-medium text-sm">+${this.images.length - 3}</div>
+                                    <div class="text-gray-500 text-xs">more</div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${showAddButton ? `
+                            <div class="add-photo-main-btn"
+                                style="aspect-ratio: 3 / 4; width: 88px; border: 1px solid rgb(228, 219, 214); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;"
+                                onclick="document.getElementById('image-upload-${this.id}').click()">
+                                <input type="file" multiple accept="image/*" 
+                                    id="image-upload-${this.id}" 
+                                    class="hidden" 
+                                    onchange="handleImageUpload(event, ${this.id})">
+                                <svg class="w-6 h-6" style="color: #666;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+                        
+            getImageStyleFromCropSettings(cropSettings, containerWidth = 88) {
+                if (!cropSettings) {
+                    return 'width: 100%; height: 100%; object-fit: cover;';
+                }
+                
+                const zoom = cropSettings.zoom || 1;
+                const rotation = cropSettings.rotation || 0;
+                const offsetX = cropSettings.offsetX || 0;
+                const offsetY = cropSettings.offsetY || 0;
+                
+                const scaleRatio = containerWidth / 300;
+                const scaledOffsetX = offsetX * scaleRatio;
+                const scaledOffsetY = offsetY * scaleRatio;
+                
+                return `
+                    transform: translate(${scaledOffsetX}px, ${scaledOffsetY}px) rotate(${rotation}deg) scale(${zoom});
+                    transform-origin: center center;
+                    width: 100%;
+                    height: 100%;
+                    max-width: none;
+                    max-height: none;
+                    object-fit: cover;
+                `;
+            }
+        }
+
+        // Add this function to load pending changes
+        function loadPendingCropChanges() {
+            const stored = sessionStorage.getItem('pendingCropChanges');
+            if (stored) {
+                try {
+                    pendingCropChanges = JSON.parse(stored);
+                } catch (e) {
+                    pendingCropChanges = {};
+                }
+            }
+        }
+
+        // Add this function to save pending changes
+        function savePendingCropChanges() {
+            sessionStorage.setItem('pendingCropChanges', JSON.stringify(pendingCropChanges));
+        }
+
+        function updateCarouselNavigation() {
+            const container = document.getElementById('thumbnailsContainer');
+            const carousel = document.getElementById('thumbnailCarousel');
+            const leftBtn = document.getElementById('carouselLeft');
+            const rightBtn = document.getElementById('carouselRight');
+            
+            if (!container || !carousel || !leftBtn || !rightBtn) return;
+            
+            const hasOverflow = container.scrollWidth > container.clientWidth;
+            
+            // Show/hide navigation based on overflow
+            if (hasOverflow) {
+                carousel.classList.add('has-overflow');
+            } else {
+                carousel.classList.remove('has-overflow');
+            }
+            
+            // Update button states
+            const isAtStart = container.scrollLeft <= 0;
+            const isAtEnd = container.scrollLeft >= container.scrollWidth - container.clientWidth - 1;
+            
+            leftBtn.classList.toggle('disabled', isAtStart);
+            rightBtn.classList.toggle('disabled', isAtEnd);
+        }
+
+        function scrollThumbnails(direction) {
+            const container = document.getElementById('thumbnailsContainer');
+            if (!container) return;
+            
+            const scrollAmount = 120; // Adjust based on thumbnail width + gap
+            
+            if (direction === 'left') {
+                container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+
+        function setupThumbnailScrollListener() {
+            const container = document.getElementById('thumbnailsContainer');
+            if (!container) return;
+            
+            container.addEventListener('scroll', updateCarouselNavigation);
+            window.addEventListener('resize', updateCarouselNavigation);
+            
+            // Initial update
+            setTimeout(updateCarouselNavigation, 100);
+        }
+
+        // Category overlay functions
+        async function openCategorySelector(listingId) {
+            currentEditingListingId = listingId;
+            
+            const overlay = document.getElementById('category-overlay');
+            overlay.classList.add('active');
+            
+            // Clear search
+            document.getElementById('category-search-input').value = '';
+            document.getElementById('search-results').style.display = 'none';
+            
+            // Get the current listing and its selected category
+            const listing = listings.find(l => l.id === listingId);
+            const currentCategoryPath = listing?.categoryPath || '';
+            
+            if (currentCategoryPath) {
+                // Navigate to the current category's location in the hierarchy
+                await navigateToCurrentCategory(currentCategoryPath);
+            } else {
+                // No category selected, show root categories
+                currentCategoryPath = [];
+                document.getElementById('category-breadcrumb').style.display = 'none';
+                await loadCategories();
+            }
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+
+        async function navigateToCurrentCategory(categoryPath) {
+            try {
+                // Split the path (e.g., "clothing.tops.tees" -> ["clothing", "tops", "tees"])
+                const pathParts = categoryPath.split('.');
+                
+                // Load the parent category (all parts except the last one)
+                // If it's a root category, load root; otherwise load the parent
+                const parentPath = pathParts.length > 1 ? pathParts.slice(0, -1).join('.') : '';
+                
+                // Build the currentCategoryPath for breadcrumb navigation
+                currentCategoryPath = [];
+                if (parentPath) {
+                    // Fetch the full breadcrumb data for the parent path
+                    const response = await fetch(`/api/categories/breadcrumb/?path=${encodeURIComponent(parentPath)}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.breadcrumb) {
+                        currentCategoryPath = data.breadcrumb;
+                    }
+                }
+                
+                // Load categories at the parent level (showing the current category among its siblings)
+                await loadCategories(parentPath);
+                
+                // Update breadcrumb to show the full path including "Categories" root
+                await updateBreadcrumb(parentPath);
+                
+                // Highlight the currently selected category in the list
+                highlightCurrentCategory(pathParts[pathParts.length - 1]);
+                
+            } catch (error) {
+                console.error('Error navigating to current category:', error);
+                // Fallback to loading root categories
+                currentCategoryPath = [];
+                document.getElementById('category-breadcrumb').style.display = 'none';
+                await loadCategories();
+            }
+        }
+
+        async function updateBreadcrumb(currentPath) {
+            const breadcrumbContainer = document.getElementById('category-breadcrumb');
+            
+            if (!currentPath) {
+                // At root level, show "Categories"
+                breadcrumbContainer.innerHTML = '<span class="text-gray-400">Categories</span>';
+                breadcrumbContainer.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/categories/breadcrumb/?path=${encodeURIComponent(currentPath)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const breadcrumbItems = ['<span class="breadcrumb-item" onclick="navigateToBreadcrumb(\'\')">Categories</span>'];
+                    
+                    if (data.breadcrumb && data.breadcrumb.length > 0) {
+                        data.breadcrumb.forEach(item => {
+                            breadcrumbItems.push(`<span class="breadcrumb-item" onclick="navigateToBreadcrumb('${item.path}')">${item.name}</span>`);
+                        });
+                    }
+                    
+                    breadcrumbContainer.innerHTML = breadcrumbItems.join(' > ');
+                    breadcrumbContainer.style.display = 'block';
+                } else {
+                    // Fallback breadcrumb
+                    breadcrumbContainer.innerHTML = '<span class="breadcrumb-item" onclick="navigateToBreadcrumb(\'\')">Categories</span>';
+                    breadcrumbContainer.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error updating breadcrumb:', error);
+                breadcrumbContainer.innerHTML = '<span class="breadcrumb-item" onclick="navigateToBreadcrumb(\'\')">Categories</span>';
+                breadcrumbContainer.style.display = 'block';
+            }
+        }
+
+        function highlightCurrentCategory(categoryId) {
+            // Remove any existing highlights
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('current-category');
+                item.style.backgroundColor = '';
+                item.style.border = '';
+            });
+            
+            // Find and highlight the current category
+            const listing = listings.find(l => l.id === currentEditingListingId);
+            if (!listing?.categoryPath) return;
+            
+            const pathParts = listing.categoryPath.split('.');
+            const currentCategoryId = pathParts[pathParts.length - 1];
+            
+            document.querySelectorAll('.category-item').forEach(item => {
+                const itemPath = item.getAttribute('onclick');
+                if (itemPath && itemPath.includes(currentCategoryId)) {
+                    item.classList.add('current-category');
+                    item.style.backgroundColor = '#2563eb20'; // Light blue background
+                    item.style.border = '1px solid #2563eb';
+                    item.style.borderRadius = '4px';
+                }
+            });
+        }
+
+        function closeCategoryOverlay() {
+            const overlay = document.getElementById('category-overlay');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            currentEditingListingId = null;
+            currentCategoryPath = [];
+        }
+
+        async function loadCategories(parentPath = '') {
+            const loading = document.getElementById('category-loading');
+            const categoryList = document.getElementById('category-list');
+            
+            loading.style.display = 'flex';
+            categoryList.innerHTML = '';
+            
+            try {
+                // Load from cache or fetch
+                if (!categoryCache) {
+                    const response = await fetch('/api/categories/tree/');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        categoryCache = data.categories;
+                    } else {
+                        throw new Error(data.error || 'Failed to load categories');
+                    }
+                }
+                
+                // Find categories to display
+                let categoriesToShow = categoryCache;
+                
+                if (parentPath) {
+                    const pathParts = parentPath.split('.');
+                    let current = categoryCache;
+                    
+                    for (const part of pathParts) {
+                        const found = current.find(cat => cat.id === part || cat.path === parentPath.substring(0, parentPath.indexOf(part) + part.length));
+                        if (found && found.children) {
+                            current = found.children;
+                        }
+                    }
+                    categoriesToShow = current;
+                }
+                
+                // Render categories
+                categoryList.innerHTML = categoriesToShow.map(category => `
+                    <div class="category-item ${category.children && category.children.length > 0 ? 'has-children' : ''}" 
+                        onclick="handleCategoryClick('${category.id}', '${category.name}', '${category.path}', ${category.children && category.children.length > 0})">
+                        ${category.name}
+                    </div>
+                `).join('');
+                
+                // Update breadcrumb
+                await updateBreadcrumb(parentPath);
+                
+                // Highlight current category if we're showing it
+                if (currentEditingListingId) {
+                    setTimeout(() => highlightCurrentCategory(), 100);
+                }
+                
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                categoryList.innerHTML = `
+                    <div class="p-4 text-center text-red-400">
+                        Failed to load categories: ${error.message}
+                    </div>
+                `;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        async function handleCategoryClick(categoryId, categoryName, categoryPath, hasChildren) {
+            if (hasChildren) {
+                // Navigate to subcategories
+                currentCategoryPath.push({ id: categoryId, name: categoryName, path: categoryPath });
+                await loadCategories(categoryPath);
+            } else {
+                // Select this category
+                selectCategory(categoryId, categoryName, categoryPath);
+            }
+        }
+
+        function selectCategory(categoryId, categoryName, categoryPath) {
+            if (!currentEditingListingId) return;
+            
+            const listing = listings.find(l => l.id === currentEditingListingId);
+            if (listing) {
+                listing.categoryPath = categoryPath;
+                listing.categoryDisplayName = categoryName;
+                saveListings();
+                
+                // Update only the category button text
+                const categoryButton = document.querySelector(`[data-listing-id="${currentEditingListingId}"] button[onclick*="openCategorySelector"] span`);
+                if (categoryButton) {
+                    categoryButton.textContent = categoryName;
+                }
+            }
+            
+            closeCategoryOverlay();
+        }
+
+        async function navigateToBreadcrumb(path) {
+            if (path === '') {
+                // Navigate to root
+                currentCategoryPath = [];
+                await loadCategories('');
+            } else {
+                // Navigate to specific path
+                const pathParts = path.split('.');
+                currentCategoryPath = [];
+                
+                // Rebuild currentCategoryPath up to this point
+                try {
+                    const response = await fetch(`/api/categories/breadcrumb/?path=${encodeURIComponent(path)}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.breadcrumb) {
+                        currentCategoryPath = data.breadcrumb;
+                    }
+                } catch (error) {
+                    console.error('Error fetching breadcrumb:', error);
+                }
+                
+                await loadCategories(path);
+            }
+        }
+
+        async function handleCategorySearch(query) {
+            // Clear existing timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            
+            const searchResults = document.getElementById('search-results');
+            const categoryList = document.getElementById('category-list');
+            
+            if (!query || query.length < 2) {
+                searchResults.style.display = 'none';
+                categoryList.style.display = 'block';
+                return;
+            }
+            
+            // Debounce search
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/categories/search/?q=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        categoryList.style.display = 'none';
+                        searchResults.style.display = 'block';
+                        
+                        if (data.results.length > 0) {
+                            searchResults.innerHTML = data.results.map(result => `
+                                <div class="search-result-item" onclick="selectCategory('${result.id}', '${result.name}', '${result.path}')">
+                                    <div class="search-result-name">${result.name}</div>
+                                    <div class="search-result-path">${result.path.replace(/\./g, ' > ')}</div>
+                                </div>
+                            `).join('');
+                        } else {
+                            searchResults.innerHTML = `
+                                <div class="p-4 text-center text-gray-400">
+                                    No categories found for "${query}"
+                                </div>
+                            `;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                    searchResults.innerHTML = `
+                        <div class="p-4 text-center text-red-400">
+                            Search failed: ${error.message}
+                        </div>
+                    `;
+                }
+            }, 300);
+        }
+
+        // Updated saveListings to include new category fields
+        function saveListings() {
+            const data = listings.map(l => ({
+                id: l.id,
+                images: l.images.map(img => ({
+                    id: img.id,
+                    name: img.name,
+                    workingUrl: img.workingUrl,
+                })),
+                category: l.category,
+                categoryPath: l.categoryPath,
+                categoryDisplayName: l.categoryDisplayName,
+                description: l.description,
+                csvFile: l.csvFile,
+                imageId: l.imageId,
+                batchId: l.batchId,
+                detectionData: l.detectionData,
+                cropSettings: l.cropSettings
+            }));
+            
+            sessionStorage.setItem('listings', JSON.stringify(data));
+        }
+
+        // Initialize
+        window.addEventListener('load', function() {
+            loadListings();
+            checkForSelectedItems();
+            renderListings();
+            document.addEventListener('click', handleClickOutside);
+            setupCropStyles();
+        });
+
+        function loadListings() {
+            const stored = sessionStorage.getItem('listings');
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    listings = data.map(item => new Listing(item));
+                    nextListingId = Math.max(...listings.map(l => l.id), -1) + 1;
+                } catch (e) {
+                    console.error('Failed to load listings:', e);
+                }
+            }
+            
+            // Always have at least one listing
+            if (listings.length === 0) {
+                listings.push(new Listing());
+                saveListings();
+            }
+        }
+
+        function renderListings() {
+            const container = document.getElementById('listings-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            listings.forEach(listing => {
+                const div = document.createElement('div');
+                div.innerHTML = listing.render();
+                container.appendChild(div.firstElementChild);
+            });
+
+            // Show/hide the "Add new listing" button
+            const addButton = document.getElementById('add-listing-button');
+            if (addButton) {
+                addButton.style.display = listings.length > 0 ? 'block' : 'none';
+            }
+        }
+
+        // Simplified image upload handler
+        async function handleImageUpload(event, listingId) {
+            const listing = listings.find(l => l.id === listingId);
+            if (!listing) return;
+            
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+            
+            const isAdditionalUpload = listing.images.length > 0;
+            
+            if (isAdditionalUpload) {
+                // Show loading animation next to thumbnails
+                showInlineImageLoading(listingId);
+            } else {
+                // Show detection loading for first upload
+                showDetectionLoading(listingId);
+            }
+            
+            // Upload images
+            const uploadResults = [];
+            for (const file of files.slice(0, 9 - listing.images.length)) {
+                const result = await listing.uploadImage(file);
+                uploadResults.push(result);
+            }
+            
+            const successfulUploads = uploadResults.filter(result => result && result.success);
+            
+            if (successfulUploads.length === 0) {
+                if (isAdditionalUpload) {
+                    hideInlineImageLoading(listingId);
+                } else {
+                    hideDetectionLoading(listingId);
+                }
+                showDetectionError(listingId, 'Failed to upload images');
+                return;
+            }
+            
+            if (isAdditionalUpload) {
+                // Hide loading animation and re-render
+                hideInlineImageLoading(listingId);
+                renderListings();
+                return;
+            }
+            
+            // Continue with detection for initial upload...
+            const successfulFiles = files.slice(0, successfulUploads.length);
+            const detectionResult = await listing.detectFashion(successfulFiles);
+            
+            hideDetectionLoading(listingId);
+            
+            if (detectionResult?.error) {
+                showDetectionError(listingId, detectionResult.error);
+                return;
+            }
+            
+            // Handle detection results...
+            if (detectionResult.multipleDetected && detectionResult.data) {
+                // Store for selection page and show success message
+                sessionStorage.setItem('pendingDetection', JSON.stringify({
+                    listingId: listingId,
+                    detection: detectionResult.data,
+                    imageData: successfulUploads,
+                    fullListing: {
+                        id: listing.id,
+                        images: listing.images,
+                        batchId: listing.batchId
+                    }
+                }));
+                
+                showDetectionSuccess(listingId, detectionResult.data);
+            } else if (detectionResult.data) {
+                displayDetectionResults(listingId, detectionResult.data);
+            }
+            
+            renderListings();
+        }
+
+        function handleCsvUpload(event, listingId) {
+            const listing = listings.find(l => l.id === listingId);
+            if (!listing) return;
+            
+            const file = event.target.files[0];
+            if (file) {
+                listing.csvFile = file.name;
+                saveListings();
+                
+                const uploadArea = event.target.closest('.upload-area');
+                uploadArea.style.borderColor = '#10b981';
+                uploadArea.style.backgroundColor = '#f0fdf4';
+                uploadArea.innerHTML = `
+                    <div class="text-green-600 text-sm font-medium">CSV Uploaded</div>
+                    <div class="text-green-500 text-xs">${file.name}</div>
+                `;
+            }
+        }
+
+        // Handle returns from selection page
+        function checkForSelectedItems() {
+            const fromSelection = sessionStorage.getItem('fromSelection');
+            const selectedIndices = sessionStorage.getItem('selectedIndices');
+            const storedResults = sessionStorage.getItem('detectionResults');
+            const storedImages = sessionStorage.getItem('uploadedImages');
+            const pendingDetection = sessionStorage.getItem('pendingDetection');
+            
+            if (fromSelection === 'true' && selectedIndices && storedResults) {
+                try {
+                    const indices = JSON.parse(selectedIndices);
+                    const detectionResults = JSON.parse(storedResults);
+                    const detectedObjects = detectionResults.detected_objects || [];
+                    const images = storedImages ? JSON.parse(storedImages) : [];
+                    
+                    let originalListing = null;
+                    if (pendingDetection) {
+                        const pending = JSON.parse(pendingDetection);
+                        originalListing = listings.find(l => l.id === pending.listingId);
+                        listings = listings.filter(l => l.id !== pending.listingId);
+                    }
+                    
+                    // Create new listings for selected items
+                    indices.forEach(index => {
+                        const item = detectedObjects[index];
+                        if (item) {
+                            const newListing = new Listing({
+                                description: item.description || '',
+                                images: originalListing ? originalListing.images : images.map(img => ({
+                                    id: img.id,
+                                    name: img.name,
+                                    workingUrl: img.workingUrl || img.url || img.data
+                                })),
+                                detectionData: { 
+                                    detected_objects: [item],
+                                    primary_source_index: item.source_image_index || 0
+                                },
+                                batchId: originalListing ? originalListing.batchId : Date.now().toString()
+                            });
+                            
+                            newListing.updateCategoryFromDetection(item);
+                            listings.push(newListing);
+                        }
+                    });
+                    
+                    // Clean up session
+                    sessionStorage.removeItem('fromSelection');
+                    sessionStorage.removeItem('selectedIndices');
+                    sessionStorage.removeItem('pendingDetection');
+                    sessionStorage.removeItem('detectionResults');
+                    sessionStorage.removeItem('uploadedImages');
+                    
+                    saveListings();
+                } catch (error) {
+                    console.error('Error loading selected items:', error);
+                }
+            }
+        }
+
+        function updateListing(id, field, value) {
+            const listing = listings.find(l => l.id === id);
+            if (listing) {
+                listing[field] = value;
+                saveListings();
+            }
+        }
+
+        function deleteListing(id) {
+            if (confirm('Are you sure you want to delete this listing?')) {
+                listings = listings.filter(l => l.id !== id);
+                
+                if (listings.length === 0) {
+                    listings.push(new Listing());
+                }
+                
+                saveListings();
+                renderListings();
+            }
+        }
+
+        function addNewListing() {
+            listings.push(new Listing());
+            saveListings();
+            renderListings();
+            
+            setTimeout(() => {
+                const allListings = document.querySelectorAll('[data-listing-id]');
+                const newListing = allListings[allListings.length - 1];
+                
+                if (newListing) {
+                    const yOffset = -100;
+                    const y = newListing.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    
+                    window.scrollTo({
+                        top: y,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
+        }
+
+        function submitListings() {
+            const validListings = listings.filter(l => l.images.length > 0);
+            
+            if (validListings.length === 0) {
+                alert('Please add images to at least one listing');
+                return;
+            }
+            
+            const listingsWithSemanticData = validListings.map(listing => ({
+                ...listing,
+                cropSettings: listing.cropSettings || {},
+                categoryPath: listing.categoryPath,
+                categoryDisplayName: listing.categoryDisplayName
+            }));
+            
+            console.log('Submitting listings with category data:', listingsWithSemanticData);
+            alert(`Creating ${validListings.length} listing(s)...`);
+            
+            setTimeout(() => {
+                listings = [new Listing()];
+                saveListings();
+                renderListings();
+            }, 2000);
+        }
+
+        // Existing crop functions (keeping them intact)
+        let currentEditingSlot = null;
+        let currentRotation = 0;
+        let currentZoom = 1;
+        let cropData = {
+            zoom: 1,
+            rotation: 0,
+            offsetX: 0,
+            offsetY: 0,
+            cropBox: { x: 0, y: 0, width: 100, height: 100 },
+            originalImageDimensions: { width: 0, height: 0 }
+        };
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let imageStartX = 0;
+        let imageStartY = 0;
+
+        function openCropPopup(imageContainer, listingId, imageIndex) {
+            currentEditingSlot = imageContainer;
+            const currentImage = imageContainer.querySelector('img');
+            
+            const listing = listings.find(l => l.id == listingId);
+
+            // Load pending changes from session storage
+            loadPendingCropChanges();
+            
+            // Initialize session crop data for this listing if not exists
+            if (!sessionCropData[listingId]) {
+                sessionCropData[listingId] = {};
+            }
+
+            // Initialize popup thumbnails for ALL images
+            const popupThumbsContainer = document.getElementById('popup-thumbnails-container');
+            if (popupThumbsContainer && listing) {
+                popupThumbsContainer.innerHTML = '';
+                
+                listing.images.forEach((img, idx) => {
+                    const thumbnail = createPopupThumbnail(img, idx, listingId, imageIndex);
+                    popupThumbsContainer.appendChild(thumbnail);
+                });
+                
+                updatePopupAddButton(listingId);
+            }
+
+            // Load crop data - check pending changes first, then saved settings
+            const pendingKey = `${listingId}-${imageIndex}`;
+            if (pendingCropChanges[pendingKey]) {
+                cropData = { ...pendingCropChanges[pendingKey] };
+                currentZoom = cropData.zoom;
+                currentRotation = cropData.rotation;
+            } else if (listing && listing.cropSettings && listing.cropSettings[imageIndex]) {
+                const settings = listing.cropSettings[imageIndex];
+                cropData = {
+                    zoom: settings.zoom || 1,
+                    rotation: settings.rotation || 0,
+                    offsetX: settings.offsetX || 0,
+                    offsetY: settings.offsetY || 0,
+                    cropBox: settings.cropBox || { x: 0, y: 0, width: 100, height: 100 },
+                    originalImageDimensions: settings.originalImageDimensions || { width: 0, height: 0 }
+                };
+                currentZoom = settings.zoom || 1;
+                currentRotation = settings.rotation || 0;
+            } else {
+                cropData = {
+                    zoom: 1,
+                    rotation: 0,
+                    offsetX: 0,
+                    offsetY: 0,
+                    cropBox: { x: 0, y: 0, width: 100, height: 100 },
+                    originalImageDimensions: { width: 0, height: 0 }
+                };
+                currentZoom = 1;
+                currentRotation = 0;
+            }
+            
+            // Store current crop data in session
+            sessionCropData[listingId][imageIndex] = { ...cropData };
+            
+            const popup = document.getElementById('cropPopup');
+            if (popup && listing && listing.images[imageIndex]) {
+                popup.style.visibility = 'hidden';
+                popup.classList.add('active');
+                popup.dataset.listingId = listingId;
+                popup.dataset.imageIndex = imageIndex;
+                
+                const slider = document.getElementById('zoomSlider');
+                if (slider) {
+                    slider.value = Math.round(currentZoom * 100);
+                }
+                const zoomValue = document.getElementById('zoomValue');
+                if (zoomValue) {
+                    zoomValue.textContent = `${Math.round(currentZoom * 100)}%`;
+                }
+                
+                const cropImage = document.getElementById('cropImage');
+                const clickedImage = listing.images[imageIndex];
+                
+                if (cropImage && clickedImage) {
+                    cropImage.src = clickedImage.workingUrl;
+                    
+                    cropImage.onload = function() {
+                        cropData.originalImageDimensions = {
+                            width: this.naturalWidth,
+                            height: this.naturalHeight
+                        };
+                        
+                        // Update session data with dimensions
+                        sessionCropData[listingId][imageIndex] = { ...cropData };
+                        
+                        updateImageTransform();
+                        setupImageDragging();
+                        setupThumbnailScrollListener();
+                        popup.style.visibility = 'visible';
+                        
+                        requestAnimationFrame(() => {
+                            const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+                            if (thumbnailsContainer) {
+                                thumbnailsContainer.scrollLeft = 0;
+                            }
+                        });
+                    };
+                }
+            }
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Enhanced createPopupThumbnail function with drag-and-drop support and auto-scroll
+        function createPopupThumbnail(img, idx, listingId, currentImageIndex) {
+            const listing = listings.find(l => l.id === listingId);
+            const thumbWrapper = document.createElement('div');
+            thumbWrapper.style.position = 'relative';
+            thumbWrapper.style.flexShrink = '0';
+            thumbWrapper.draggable = true; // Make draggable
+            thumbWrapper.dataset.imageIndex = idx; // Store index for reordering
+            
+            const container = document.createElement('div');
+            container.className = 'bg-gray-100 rounded-lg overflow-hidden cursor-pointer';
+            container.style.cssText = 'width: 40px; height: 53px; position: relative; transition: all 0.2s;';
+            
+            const innerContainer = document.createElement('div');
+            innerContainer.className = 'absolute inset-0 flex items-center justify-center';
+            innerContainer.style.overflow = 'hidden';
+            
+            const thumbImg = document.createElement('img');
+            thumbImg.src = img.workingUrl;
+            thumbImg.style.pointerEvents = 'none';
+            
+            const cropSettings = listing?.cropSettings && listing.cropSettings[idx];
+            if (cropSettings) {
+                const scaleRatio = 40 / 300;
+                const scaledOffsetX = cropSettings.offsetX * scaleRatio;
+                const scaledOffsetY = cropSettings.offsetY * scaleRatio;
+                
+                thumbImg.style.cssText = `
+                    transform: translate(${scaledOffsetX}px, ${scaledOffsetY}px) rotate(${cropSettings.rotation}deg) scale(${cropSettings.zoom});
+                    transform-origin: center center;
+                    width: 100%;
+                    height: 100%;
+                    max-width: none;
+                    max-height: none;
+                    object-fit: cover;
+                    pointer-events: none;
+                `;
+            } else {
+                thumbImg.style.cssText = 'width: 100%; height: 100%; object-fit: cover; pointer-events: none;';
+            }
+            
+            // Direct click to switch images with auto-scroll
+            container.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (idx !== currentImageIndex) {
+                    switchToImage(listingId, idx);
+                    scrollThumbnailCarousel();
+                }
+            };
+                        
+            // Visual feedback for hover
+            container.onmouseenter = () => {
+                if (idx !== currentImageIndex) {
+                    container.style.opacity = '0.8';
+                    container.style.transform = 'scale(0.95)';
+                }
+            };
+            
+            container.onmouseleave = () => {
+                container.style.opacity = '1';
+                container.style.transform = 'scale(1)';
+            };
+            
+            // Highlight current image
+            if (idx === currentImageIndex) {
+                container.style.border = '2px solid #3B82F6';
+                container.style.boxShadow = '0 0 0 1px rgba(59, 130, 246, 0.3)';
+            } else {
+                container.style.border = '1px solid #E5E7EB';
+            }
+            
+            // Drag and drop event handlers
+            thumbWrapper.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', idx.toString());
+                thumbWrapper.style.opacity = '0.5';
+                
+                // Add visual feedback
+                thumbWrapper.classList.add('dragging');
+            });
+            
+            thumbWrapper.addEventListener('dragend', (e) => {
+                thumbWrapper.style.opacity = '1';
+                thumbWrapper.classList.remove('dragging');
+                
+                // Remove all drop indicators
+                document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
+                
+                // Scroll after drag operation completes
+                setTimeout(() => {
+                    scrollThumbnailCarousel();
+                }, 100);
+            });
+            
+            thumbWrapper.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            });
+            
+            thumbWrapper.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                if (!thumbWrapper.classList.contains('dragging')) {
+                    thumbWrapper.style.borderLeft = '3px solid #3B82F6';
+                }
+            });
+            
+            thumbWrapper.addEventListener('dragleave', (e) => {
+                if (!thumbWrapper.contains(e.relatedTarget)) {
+                    thumbWrapper.style.borderLeft = '';
+                }
+            });
+            
+            thumbWrapper.addEventListener('drop', (e) => {
+                e.preventDefault();
+                thumbWrapper.style.borderLeft = '';
+                
+                const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const targetIndex = idx;
+                
+                if (draggedIndex !== targetIndex) {
+                    reorderImages(listingId, draggedIndex, targetIndex, currentImageIndex);
+                }
+            });
+            
+            // Remove button (only show on active/selected thumbnail)
+            if (idx === currentImageIndex) {
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'thumbnail-remove-btn';
+                removeBtn.style.cssText = `
+                    position: absolute; 
+                    top: -8px; 
+                    right: -8px; 
+                    background: #565656; 
+                    color: white; 
+                    border-radius: 50%; 
+                    width: 18px; 
+                    height: 18px; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    cursor: pointer; 
+                    border: 1px solid white; 
+                    z-index: 10;
+                    transition: all 0.2s;
+                `;
+                removeBtn.innerHTML = `
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                `;
+                
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    
+                    listing.images.splice(idx, 1);
+                    
+                    if (listing.cropSettings) {
+                        const newCropSettings = {};
+                        Object.keys(listing.cropSettings).forEach(key => {
+                            const keyIdx = parseInt(key);
+                            if (keyIdx < idx) {
+                                newCropSettings[key] = listing.cropSettings[key];
+                            } else if (keyIdx > idx) {
+                                newCropSettings[keyIdx - 1] = listing.cropSettings[key];
+                            }
+                        });
+                        listing.cropSettings = newCropSettings;
+                    }
+                    
+                    saveListings();
+                    updateSpecificListingThumbnails(listingId);
+                    updatePopupAddButton(listingId);
+                    
+                    if (listing.images.length === 0) {
+                        closeCropPopup();
+                    } else {
+                        let newImageIndex = idx;
+                        if (newImageIndex >= listing.images.length) {
+                            newImageIndex = listing.images.length - 1;
+                        }
+                        
+                        refreshPopupThumbnails(listingId, newImageIndex);
+                        switchToImage(listingId, newImageIndex);
+                    }
+                };
+                
+                thumbWrapper.appendChild(removeBtn);
+            }
+            
+            innerContainer.appendChild(thumbImg);
+            container.appendChild(innerContainer);
+            thumbWrapper.appendChild(container);
+            
+            return thumbWrapper;
+        }
+
+        // Function to scroll the thumbnail carousel to the left by 80px
+        function scrollThumbnailCarousel() {
+            // Try both possible container IDs
+            let scrollContainer = document.getElementById('thumbnailsContainer');
+            if (!scrollContainer) {
+                scrollContainer = document.getElementById('thumbnailCarousel');
+            }
+            if (!scrollContainer) {
+                return;
+            }
+            
+            // Find the currently selected thumbnail (the one with the blue border)
+            const selectedThumbnail = scrollContainer.querySelector('[style*="border: 2px solid rgb(59, 130, 246)"]');
+            if (!selectedThumbnail) {
+                return;
+            }
+            
+            // Get the parent wrapper (the draggable div)
+            const thumbnailWrapper = selectedThumbnail.closest('[draggable="true"]');
+            if (!thumbnailWrapper) {
+                return;
+            }
+            
+            // Get positions and dimensions
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const thumbnailRect = thumbnailWrapper.getBoundingClientRect();
+            
+            // Calculate the thumbnail's position relative to the container
+            const thumbnailLeft = thumbnailRect.left - containerRect.left + scrollContainer.scrollLeft;
+            const thumbnailWidth = thumbnailRect.width;
+            const containerWidth = containerRect.width;
+            
+            // Calculate the center position
+            const thumbnailCenter = thumbnailLeft + (thumbnailWidth / 2);
+            const containerCenter = containerWidth / 2;
+            
+            // Calculate the scroll position to center the thumbnail
+            const targetScrollLeft = thumbnailCenter - containerCenter;
+            
+            // Ensure we don't scroll beyond boundaries
+            const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+            const finalScrollLeft = Math.max(0, Math.min(maxScroll, targetScrollLeft));
+            
+            // Only scroll if there's a meaningful change (avoid tiny adjustments)
+            if (Math.abs(finalScrollLeft - scrollContainer.scrollLeft) > 5) {
+                scrollContainer.scrollTo({
+                    left: finalScrollLeft,
+                    behavior: 'smooth'
+                });
+                
+                // Fallback method
+                setTimeout(() => {
+                    if (Math.abs(scrollContainer.scrollLeft - finalScrollLeft) > 5) {
+                        scrollContainer.scrollLeft = finalScrollLeft;
+                    }
+                }, 100);
+            }
+        }
+
+
+        // New function to handle image reordering
+        function reorderImages(listingId, fromIndex, toIndex, currentImageIndex) {
+            const listing = listings.find(l => l.id === listingId);
+            if (!listing || fromIndex === toIndex) return;
+            
+            // Reorder images array
+            const movedImage = listing.images.splice(fromIndex, 1)[0];
+            listing.images.splice(toIndex, 0, movedImage);
+            
+            // Reorder crop settings if they exist
+            if (listing.cropSettings) {
+                const newCropSettings = {};
+                const oldSettings = { ...listing.cropSettings };
+                
+                // Move the dragged item's crop settings
+                if (oldSettings[fromIndex]) {
+                    newCropSettings[toIndex] = oldSettings[fromIndex];
+                }
+                
+                // Adjust other indices
+                Object.keys(oldSettings).forEach(key => {
+                    const keyIdx = parseInt(key);
+                    if (keyIdx === fromIndex) return; // Already handled above
+                    
+                    let newIdx = keyIdx;
+                    if (fromIndex < toIndex) {
+                        // Moving right: shift items between fromIndex and toIndex left
+                        if (keyIdx > fromIndex && keyIdx <= toIndex) {
+                            newIdx = keyIdx - 1;
+                        }
+                    } else {
+                        // Moving left: shift items between toIndex and fromIndex right
+                        if (keyIdx >= toIndex && keyIdx < fromIndex) {
+                            newIdx = keyIdx + 1;
+                        }
+                    }
+                    
+                    if (oldSettings[keyIdx]) {
+                        newCropSettings[newIdx] = oldSettings[keyIdx];
+                    }
+                });
+                
+                listing.cropSettings = newCropSettings;
+            }
+            
+            // Determine new current image index
+            let newCurrentIndex = currentImageIndex;
+            if (currentImageIndex === fromIndex) {
+                newCurrentIndex = toIndex;
+            } else if (fromIndex < toIndex) {
+                if (currentImageIndex > fromIndex && currentImageIndex <= toIndex) {
+                    newCurrentIndex = currentImageIndex - 1;
+                }
+            } else {
+                if (currentImageIndex >= toIndex && currentImageIndex < fromIndex) {
+                    newCurrentIndex = currentImageIndex + 1;
+                }
+            }
+            
+            saveListings();
+            updateSpecificListingThumbnails(listingId);
+            refreshPopupThumbnails(listingId, newCurrentIndex);
+            
+            // Update popup to show correct image
+            const popup = document.getElementById('cropPopup');
+            if (popup) {
+                popup.dataset.imageIndex = newCurrentIndex;
+                switchToImage(listingId, newCurrentIndex);
+            }
+        }
+
+        // Function to handle switching between images in the popup
+        function switchToImage(listingId, imageIndex) {
+            const listing = listings.find(l => l.id === listingId);
+            if (!listing || !listing.images[imageIndex]) {
+                console.error('Invalid image index or listing not found');
+                return;
+            }
+            
+            const popup = document.getElementById('cropPopup');
+            if (!popup) return;
+            
+            popup.dataset.imageIndex = imageIndex;
+            
+            // Load crop settings - check pending changes first, then session, then saved settings
+            const pendingKey = `${listingId}-${imageIndex}`;
+            if (pendingCropChanges[pendingKey]) {
+                cropData = { ...pendingCropChanges[pendingKey] };
+                currentZoom = cropData.zoom;
+                currentRotation = cropData.rotation;
+            } else if (sessionCropData[listingId] && sessionCropData[listingId][imageIndex]) {
+                cropData = { ...sessionCropData[listingId][imageIndex] };
+                currentZoom = cropData.zoom;
+                currentRotation = cropData.rotation;
+            } else if (listing.cropSettings && listing.cropSettings[imageIndex]) {
+                const settings = listing.cropSettings[imageIndex];
+                cropData = {
+                    zoom: settings.zoom || 1,
+                    rotation: settings.rotation || 0,
+                    offsetX: settings.offsetX || 0,
+                    offsetY: settings.offsetY || 0,
+                    cropBox: settings.cropBox || { x: 0, y: 0, width: 100, height: 100 },
+                    originalImageDimensions: settings.originalImageDimensions || { width: 0, height: 0 }
+                };
+                currentZoom = settings.zoom || 1;
+                currentRotation = settings.rotation || 0;
+            } else {
+                cropData = {
+                    zoom: 1,
+                    rotation: 0,
+                    offsetX: 0,
+                    offsetY: 0,
+                    cropBox: { x: 0, y: 0, width: 100, height: 100 },
+                    originalImageDimensions: { width: 0, height: 0 }
+                };
+                currentZoom = 1;
+                currentRotation = 0;
+            }
+            
+            // Update UI controls
+            const slider = document.getElementById('zoomSlider');
+            if (slider) {
+                slider.value = Math.round(currentZoom * 100);
+            }
+            const zoomValue = document.getElementById('zoomValue');
+            if (zoomValue) {
+                zoomValue.textContent = `${Math.round(currentZoom * 100)}%`;
+            }
+            
+            const rotationSlider = document.getElementById('rotationSlider');
+            if (rotationSlider) {
+                let sliderVal = currentRotation;
+                if (sliderVal > 180) sliderVal -= 360;
+                rotationSlider.value = sliderVal;
+            }
+            const rotationValue = document.getElementById('rotationValue');
+            if (rotationValue) {
+                let displayVal = currentRotation;
+                if (displayVal > 180) displayVal -= 360;
+                rotationValue.textContent = `${displayVal}°`;
+            }
+            
+            // Update the main crop image
+            const cropImage = document.getElementById('cropImage');
+            const newImage = listing.images[imageIndex];
+            if (cropImage && newImage) {
+                cropImage.src = newImage.workingUrl;
+                
+                cropImage.onload = function() {
+                    cropData.originalImageDimensions = {
+                        width: this.naturalWidth,
+                        height: this.naturalHeight
+                    };
+                    
+                    // Update session storage
+                    if (!sessionCropData[listingId]) {
+                        sessionCropData[listingId] = {};
+                    }
+                    sessionCropData[listingId][imageIndex] = { ...cropData };
+                    
+                    updateImageTransform();
+                };
+            }
+            
+            refreshPopupThumbnails(listingId, imageIndex);
+        }
+
+        // Function to refresh popup thumbnails with updated highlighting
+        function refreshPopupThumbnails(listingId, currentImageIndex) {
+            const listing = listings.find(l => l.id === listingId);
+            const popupThumbsContainer = document.getElementById('popup-thumbnails-container');
+            
+            if (!listing || !popupThumbsContainer) return;
+            
+            // Get existing thumbnail wrappers
+            const existingThumbnails = popupThumbsContainer.querySelectorAll('[draggable="true"]');
+            const existingCount = existingThumbnails.length;
+            const currentCount = listing.images.length;
+            
+            // Check if we need to regenerate (count changed or no existing thumbnails)
+            const needsRegeneration = existingCount !== currentCount || existingCount === 0;
+            
+            if (needsRegeneration) {
+                // Complete regeneration needed
+                popupThumbsContainer.innerHTML = '';
+                
+                listing.images.forEach((img, idx) => {
+                    const thumbnail = createPopupThumbnail(img, idx, listingId, currentImageIndex);
+                    popupThumbsContainer.appendChild(thumbnail);
+                });
+            } else {
+                // Just update the styling of existing thumbnails
+                
+                existingThumbnails.forEach((thumbWrapper, idx) => {
+                    // Find the container div (the one with the border styling)
+                    const container = thumbWrapper.querySelector('.bg-gray-100.rounded-lg.overflow-hidden.cursor-pointer');
+                    if (!container) return;
+                    
+                    // Remove existing remove button
+                    const existingRemoveBtn = thumbWrapper.querySelector('.thumbnail-remove-btn');
+                    if (existingRemoveBtn) {
+                        existingRemoveBtn.remove();
+                    }
+                    
+                    // Clear any existing click handlers to avoid conflicts
+                    container.onclick = null;
+                    
+                    // Update the click event handler with current context
+                    container.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                                                
+                        if (idx !== currentImageIndex) {
+                            switchToImage(listingId, idx);
+                            scrollThumbnailCarousel();
+                        } else {
+                            console.log(`Already on image ${idx}, no switch needed`);
+                        }
+                    };
+                    
+                    // Also ensure the wrapper doesn't interfere with clicks
+                    thumbWrapper.style.pointerEvents = 'auto';
+                    
+                    // Update border styling based on whether this is the current image
+                    if (idx === currentImageIndex) {
+                        container.style.border = '2px solid #3B82F6';
+                        container.style.boxShadow = '0 0 0 1px rgba(59, 130, 246, 0.3)';
+                        
+                        // Add remove button to the current thumbnail
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'thumbnail-remove-btn';
+                        removeBtn.style.cssText = `
+                            position: absolute; 
+                            top: -8px; 
+                            right: -8px; 
+                            background: #565656; 
+                            color: white; 
+                            border-radius: 50%; 
+                            width: 18px; 
+                            height: 18px; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            cursor: pointer; 
+                            border: 1px solid white; 
+                            z-index: 10;
+                            transition: all 0.2s;
+                        `;
+                        removeBtn.innerHTML = `
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        `;
+                        
+                        removeBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            
+                            listing.images.splice(idx, 1);
+                            
+                            if (listing.cropSettings) {
+                                const newCropSettings = {};
+                                Object.keys(listing.cropSettings).forEach(key => {
+                                    const keyIdx = parseInt(key);
+                                    if (keyIdx < idx) {
+                                        newCropSettings[key] = listing.cropSettings[key];
+                                    } else if (keyIdx > idx) {
+                                        newCropSettings[keyIdx - 1] = listing.cropSettings[key];
+                                    }
+                                });
+                                listing.cropSettings = newCropSettings;
+                            }
+                            
+                            saveListings();
+                            updateSpecificListingThumbnails(listingId);
+                            updatePopupAddButton(listingId);
+                            
+                            if (listing.images.length === 0) {
+                                closeCropPopup();
+                            } else {
+                                let newImageIndex = idx;
+                                if (newImageIndex >= listing.images.length) {
+                                    newImageIndex = listing.images.length - 1;
+                                }
+                                
+                                refreshPopupThumbnails(listingId, newImageIndex);
+                                switchToImage(listingId, newImageIndex);
+                            }
+                        };
+                        
+                        thumbWrapper.appendChild(removeBtn);
+                        
+                    } else {
+                        container.style.border = '1px solid #E5E7EB';
+                        container.style.boxShadow = '';
+                    }
+                    
+                });
+            }
+            
+            // Update add button visibility
+            updatePopupAddButton(listingId);
+            
+            // Update carousel navigation
+            setTimeout(updateCarouselNavigation, 50);
+            
+            // Auto-scroll only if we didn't regenerate (to avoid double scrolling)
+            if (!needsRegeneration) {
+                setTimeout(scrollThumbnailCarousel, 100);
+            }
+        }
+
+        // Create a function to generate the popup add button conditionally
+        function createPopupAddButton() {
+            const addButton = document.createElement('button');
+            addButton.className = 'add-photo-btn';
+            addButton.style.cssText = `
+                aspect-ratio: 3/4;
+                width: 40px;
+                border: 1px solid #E4DBD6;
+                border-radius: 8px;
+                background: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s;
+            `;
+            addButton.innerHTML = '<span style="font-size: 24px; color: #666;">+</span>';
+            addButton.onclick = addPhoto;
+            
+            addButton.addEventListener('mouseenter', function() {
+                this.style.background = '#E4DBD6';
+            });
+            
+            addButton.addEventListener('mouseleave', function() {
+                this.style.background = 'white';
+            });
+            
+            return addButton;
+        }
+
+        function updatePopupAddButton(listingId) {
+            const listing = listings.find(l => l.id === listingId);
+            if (!listing) return;
+            
+            const container = document.getElementById('popup-thumbnails-container');
+            if (!container) return;
+            
+            // Remove existing add button if present
+            const existingAddButton = container.querySelector('.add-photo-btn');
+            if (existingAddButton) {
+                existingAddButton.remove();
+            }
+            
+            // Add button only if we have less than 9 images
+            if (listing.images.length < 9) {
+                const addButton = createPopupAddButton();
+                container.appendChild(addButton);
+            }
+            
+            // Update carousel navigation after adding/removing button
+            setTimeout(() => {
+                updateCarouselNavigation();
+                
+                // Reset scroll position when updating thumbnails
+                const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+                if (thumbnailsContainer) {
+                    thumbnailsContainer.scrollLeft = 0;
+                }
+            }, 50);
+        }
+
+        // Enhanced updatePopupThumbnails function
+        function updatePopupThumbnails(listingId, currentImageIndex) {
+            refreshPopupThumbnails(listingId, currentImageIndex);
+        }
+
+        function updateThumbnailVisuals(listingId, imageIndex) {
+            // Update the main listing thumbnail if it's the first image
+            if (imageIndex === 0) {
+                const listingElement = document.querySelector(`[data-listing-id="${listingId}"]`);
+                if (listingElement) {
+                    const mainThumbnail = listingElement.querySelector('[data-image-index="0"] img');
+                    if (mainThumbnail) {
+                        const pendingKey = `${listingId}-${imageIndex}`;
+                        const currentSettings = pendingCropChanges[pendingKey] || sessionCropData[listingId]?.[imageIndex];
+                        if (currentSettings) {
+                            const style = getImageStyleFromCropSettings(currentSettings, 88);
+                            mainThumbnail.style.cssText = style;
+                        }
+                    }
+                }
+            }
+            
+            // Update popup thumbnail
+            const popupThumbnail = document.querySelector(`#popup-thumbnails-container [data-image-index="${imageIndex}"] img`);
+            if (popupThumbnail) {
+                const pendingKey = `${listingId}-${imageIndex}`;
+                const currentSettings = pendingCropChanges[pendingKey] || sessionCropData[listingId]?.[imageIndex];
+                if (currentSettings) {
+                    const style = getImageStyleFromCropSettings(currentSettings, 40);
+                    popupThumbnail.style.cssText = style;
+                }
+            }
+        }
+
+        // Helper function to apply crop settings to image style
+        function getImageStyleFromCropSettings(cropSettings, containerWidth = 88) {
+            if (!cropSettings) {
+                return 'width: 100%; height: 100%; object-fit: cover;';
+            }
+            
+            const zoom = cropSettings.zoom || 1;
+            const rotation = cropSettings.rotation || 0;
+            const offsetX = cropSettings.offsetX || 0;
+            const offsetY = cropSettings.offsetY || 0;
+            
+            const scaleRatio = containerWidth / 300;
+            const scaledOffsetX = offsetX * scaleRatio;
+            const scaledOffsetY = offsetY * scaleRatio;
+            
+            return `
+                transform: translate(${scaledOffsetX}px, ${scaledOffsetY}px) rotate(${rotation}deg) scale(${zoom});
+                transform-origin: center center;
+                width: 100%;
+                height: 100%;
+                max-width: none;
+                max-height: none;
+                object-fit: cover;
+                pointer-events: none;
+            `;
+        }
+
+
+        function updateSpecificListingThumbnails(listingId) {
+            const listing = listings.find(l => l.id === listingId);
+            if (!listing) return;
+            
+            const listingElement = document.querySelector(`[data-listing-id="${listingId}"]`);
+            if (!listingElement) return;
+            
+            const imageContainer = listingElement.querySelector('.flex.gap-3.mb-4');
+            if (!imageContainer) return;
+            
+            const newThumbnailsHTML = listing.images.length > 0 
+                ? listing.renderImageThumbnails(listing.images[0])
+                : listing.renderUploadAreas();
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newThumbnailsHTML;
+            
+            if (tempDiv.firstElementChild) {
+                imageContainer.replaceWith(tempDiv.firstElementChild);
+            }
+        }
+
+        let gridTimeout = null;
+
+        function createGrid() {
+            const gridOverlay = document.getElementById('gridOverlay');
+            if (!gridOverlay || gridOverlay.children.length > 0) return;
+            
+            for (let i = 1; i < 5; i++) {
+                const line = document.createElement('div');
+                line.className = 'grid-line-vertical';
+                line.style.left = `${i * 20}%`;
+                gridOverlay.appendChild(line);
+            }
+            
+            for (let i = 1; i < 10; i++) {
+                const line = document.createElement('div');
+                line.className = 'grid-line-horizontal';
+                line.style.top = `${i * 10}%`;
+                gridOverlay.appendChild(line);
+            }
+        }
+
+        function showGrid() {
+            const gridOverlay = document.getElementById('gridOverlay');
+            if (!gridOverlay) return;
+            
+            createGrid();
+            gridOverlay.classList.add('active');
+            
+            if (gridTimeout) clearTimeout(gridTimeout);
+            
+            gridTimeout = setTimeout(() => {
+                gridOverlay.classList.remove('active');
+            }, 1500);
+        }
+
+        function revertImage() {
+            const popup = document.getElementById('cropPopup');
+            if (!popup) return;
+            
+            const listingId = parseInt(popup.dataset.listingId);
+            const imageIndex = parseInt(popup.dataset.imageIndex || '0');
+            
+            cropData = {
+                zoom: 1,
+                rotation: 0,
+                offsetX: 0,
+                offsetY: 0,
+                cropBox: { x: 0, y: 0, width: 100, height: 100 },
+                originalImageDimensions: cropData.originalImageDimensions
+            };
+            
+            currentZoom = 1;
+            currentRotation = 0;
+            
+            const slider = document.getElementById('zoomSlider');
+            if (slider) {
+                slider.value = 100;
+            }
+            const zoomValue = document.getElementById('zoomValue');
+            if (zoomValue) {
+                zoomValue.textContent = '100%';
+            }
+            
+            const cropImage = document.getElementById('cropImage');
+            if (cropImage) {
+                cropImage.style.transform = 'none';
+                cropImage.style.cursor = 'default';
+            }
+            
+            const listing = listings.find(l => l.id === listingId);
+            if (listing && listing.cropSettings && listing.cropSettings[imageIndex]) {
+                delete listing.cropSettings[imageIndex];
+                saveListings();
+            }
+        }
+
+        function closeCropPopup() {
+            const popup = document.getElementById('cropPopup');
+            if (popup) {
+                popup.classList.remove('active');
+                
+                const overlay = document.getElementById('zoomSliderOverlay');
+                const button = document.getElementById('zoomToggleBtn');
+                if (overlay) overlay.classList.remove('active');
+                if (button) button.classList.remove('active');
+                
+                // Clear session crop data but keep pending changes
+                sessionCropData = {};
+                
+                renderListings();
+            }
+            document.body.style.overflow = '';
+            
+            removeDragListeners();
+            
+            currentRotation = 0;
+            currentZoom = 1;
+            cropData = {
+                zoom: 1,
+                rotation: 0,
+                offsetX: 0,
+                offsetY: 0,
+                cropBox: { x: 0, y: 0, width: 100, height: 100 },
+                originalImageDimensions: { width: 0, height: 0 }
+            };
+            resetImageTransform();
+        }
+
+        function saveCrop() {
+            const popup = document.getElementById('cropPopup');
+            const listingId = parseInt(popup.dataset.listingId);
+            
+            // Apply all pending changes to the actual listing
+            const listing = listings.find(l => l.id === listingId);
+            if (listing) {
+                if (!listing.cropSettings) {
+                    listing.cropSettings = {};
+                }
+                
+                // Apply all pending changes for this listing
+                Object.keys(pendingCropChanges).forEach(key => {
+                    if (key.startsWith(`${listingId}-`)) {
+                        const imageIndex = parseInt(key.split('-')[1]);
+                        const cropSettings = pendingCropChanges[key];
+                        
+                        const containerWidth = 400;
+                        const containerHeight = 400;
+                        const cropBox = calculateCropBox(containerWidth, containerHeight, cropSettings);
+                        
+                        listing.cropSettings[imageIndex] = {
+                            zoom: cropSettings.zoom,
+                            rotation: cropSettings.rotation,
+                            offsetX: cropSettings.offsetX,
+                            offsetY: cropSettings.offsetY,
+                            cropBox: cropBox,
+                            originalImageDimensions: cropSettings.originalImageDimensions,
+                            timestamp: Date.now()
+                        };
+                        
+                        // Remove from pending changes
+                        delete pendingCropChanges[key];
+                    }
+                });
+                
+                saveListings();
+                savePendingCropChanges();
+                renderListings();
+            }
+            
+            closeCropPopup();
+        }
+
+        function calculateCropBox(containerWidth, containerHeight, cropSettings = cropData) {
+            const zoom = cropSettings.zoom;
+            const offsetX = cropSettings.offsetX;
+            const offsetY = cropSettings.offsetY;
+            
+            const visibleWidthPercent = (100 / zoom);
+            const visibleHeightPercent = (100 / zoom);
+            
+            const centerOffsetXPercent = -(offsetX / containerWidth) * (100 / zoom);
+            const centerOffsetYPercent = -(offsetY / containerHeight) * (100 / zoom);
+            
+            const cropBox = {
+                x: Math.max(0, (50 - visibleWidthPercent / 2) + centerOffsetXPercent),
+                y: Math.max(0, (50 - visibleHeightPercent / 2) + centerOffsetYPercent),
+                width: Math.min(100, visibleWidthPercent),
+                height: Math.min(100, visibleHeightPercent)
+            };
+            
+            return cropBox;
+        }
+
+        function setupImageDragging() {
+            const cropImage = document.getElementById('cropImage');
+            if (!cropImage) return;
+            
+            const container = cropImage.parentElement;
+            
+            container.addEventListener('mousedown', startDrag);
+            container.addEventListener('mousemove', drag);
+            container.addEventListener('mouseup', endDrag);
+            container.addEventListener('mouseleave', endDrag);
+            
+            container.addEventListener('touchstart', startDrag, { passive: false });
+            container.addEventListener('touchmove', drag, { passive: false });
+            container.addEventListener('touchend', endDrag);
+        }
+
+        function removeDragListeners() {
+            const cropImage = document.getElementById('cropImage');
+            if (!cropImage) return;
+            
+            const container = cropImage.parentElement;
+            
+            container.removeEventListener('mousedown', startDrag);
+            container.removeEventListener('mousemove', drag);
+            container.removeEventListener('mouseup', endDrag);
+            container.removeEventListener('mouseleave', endDrag);
+            container.removeEventListener('touchstart', startDrag);
+            container.removeEventListener('touchmove', drag);
+            container.removeEventListener('touchend', endDrag);
+        }
+
+        function startDrag(e) {
+            if (cropData.zoom <= 1) return;
+            
+            isDragging = true;
+            e.preventDefault();
+            
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            dragStartX = clientX;
+            dragStartY = clientY;
+            imageStartX = cropData.offsetX;
+            imageStartY = cropData.offsetY;
+            
+            const cropImage = document.getElementById('cropImage');
+            if (cropImage) {
+                cropImage.style.cursor = 'grabbing';
+            }
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            
+            const popup = document.getElementById('cropPopup');
+            if (!popup) return;
+            
+            const listingId = parseInt(popup.dataset.listingId);
+            const imageIndex = parseInt(popup.dataset.imageIndex || '0');
+            
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            
+            const deltaX = clientX - dragStartX;
+            const deltaY = clientY - dragStartY;
+            
+            cropData.offsetX = imageStartX + deltaX;
+            cropData.offsetY = imageStartY + deltaY;
+            
+            const maxOffset = (cropData.zoom - 1) * 100;
+            cropData.offsetX = Math.max(-maxOffset, Math.min(maxOffset, cropData.offsetX));
+            cropData.offsetY = Math.max(-maxOffset, Math.min(maxOffset, cropData.offsetY));
+            
+            // Store changes in session and pending changes
+            sessionCropData[listingId][imageIndex] = { ...cropData };
+            pendingCropChanges[`${listingId}-${imageIndex}`] = { ...cropData };
+            savePendingCropChanges();
+            
+            updateImageTransform();
+            updateThumbnailVisuals(listingId, imageIndex);
+            showGrid();
+        }
+
+        function endDrag() {
+            isDragging = false;
+            const cropImage = document.getElementById('cropImage');
+            if (cropImage) {
+                cropImage.style.cursor = cropData.zoom > 1 ? 'grab' : 'default';
+            }
+        }
+
+        function toggleZoomSlider() {
+            const overlay = document.getElementById('zoomSliderOverlay');
+            const button = document.getElementById('zoomToggleBtn');
+            
+            if (overlay && button) {
+                const isActive = overlay.classList.contains('active');
+                
+                const rotationOverlay = document.getElementById('rotationSliderOverlay');
+                const rotateButton = document.getElementById('rotateBtn');
+                if (rotationOverlay && rotationOverlay.classList.contains('active')) {
+                    rotationOverlay.classList.remove('active');
+                    if (rotateButton) rotateButton.classList.remove('active');
+                }
+                
+                if (isActive) {
+                    overlay.classList.remove('active');
+                    button.classList.remove('active');
+                } else {
+                    overlay.classList.add('active');
+                    button.classList.add('active');
+                    updateZoomSlider();
+                }
+            }
+        }
+        
+        function handleZoomSlider(value) {
+            const popup = document.getElementById('cropPopup');
+            if (!popup) return;
+            
+            const listingId = parseInt(popup.dataset.listingId);
+            const imageIndex = parseInt(popup.dataset.imageIndex || '0');
+            
+            currentZoom = value / 100;
+            cropData.zoom = currentZoom;
+            
+            const zoomValue = document.getElementById('zoomValue');
+            if (zoomValue) {
+                zoomValue.textContent = `${value}%`;
+            }
+            
+            if (currentZoom <= 1) {
+                cropData.offsetX = 0;
+                cropData.offsetY = 0;
+            }
+            
+            // Store changes in session and pending changes
+            sessionCropData[listingId][imageIndex] = { ...cropData };
+            pendingCropChanges[`${listingId}-${imageIndex}`] = { ...cropData };
+            savePendingCropChanges();
+            
+            updateImageTransform();
+            updateThumbnailVisuals(listingId, imageIndex);
+            showGrid();
+        }
+
+        function updateZoomSlider() {
+            const slider = document.getElementById('zoomSlider');
+            const zoomValue = document.getElementById('zoomValue');
+            
+            if (slider) {
+                slider.value = Math.round(currentZoom * 100);
+            }
+            
+            if (zoomValue) {
+                zoomValue.textContent = `${Math.round(currentZoom * 100)}%`;
+            }
+        }
+
+        function toggleRotationSlider() {
+            const overlay = document.getElementById('rotationSliderOverlay');
+            const button = document.getElementById('rotateBtn');
+            
+            if (overlay && button) {
+                const isActive = overlay.classList.contains('active');
+                
+                const zoomOverlay = document.getElementById('zoomSliderOverlay');
+                const zoomButton = document.getElementById('zoomToggleBtn');
+                if (zoomOverlay && zoomOverlay.classList.contains('active')) {
+                    zoomOverlay.classList.remove('active');
+                    if (zoomButton) zoomButton.classList.remove('active');
+                }
+                
+                if (isActive) {
+                    overlay.classList.remove('active');
+                    button.classList.remove('active');
+                } else {
+                    overlay.classList.add('active');
+                    button.classList.add('active');
+                    updateRotationSlider();
+                }
+            }
+        }
+
+        function handleRotationSlider(value) {
+            const popup = document.getElementById('cropPopup');
+            if (!popup) return;
+            
+            const listingId = parseInt(popup.dataset.listingId);
+            const imageIndex = parseInt(popup.dataset.imageIndex || '0');
+            
+            currentRotation = (parseInt(value) + 360) % 360;
+            cropData.rotation = currentRotation;
+            
+            const rotationValue = document.getElementById('rotationValue');
+            if (rotationValue) {
+                rotationValue.textContent = `${value}°`;
+            }
+            
+            const image = document.getElementById('cropImage');
+            const container = document.querySelector('.crop-image-wrapper');
+            
+            if (image && container) {
+                image.style.transform = 'none';
+                image.offsetHeight; // Force reflow
+                
+                const imageRect = image.getBoundingClientRect();
+                const imageWidth = imageRect.width;
+                const imageHeight = imageRect.height;
+                
+                const containerRect = container.getBoundingClientRect();
+                const containerWidth = containerRect.width;
+                const containerHeight = containerRect.height;
+                
+                const rotationRad = (currentRotation * Math.PI) / 180;
+                const cos = Math.abs(Math.cos(rotationRad));
+                const sin = Math.abs(Math.sin(rotationRad));
+                
+                const requiredImageWidth = containerWidth * cos + containerHeight * sin;
+                const requiredImageHeight = containerHeight * cos + containerWidth * sin;
+                
+                const scaleX = requiredImageWidth / imageWidth;
+                const scaleY = requiredImageHeight / imageHeight;
+                
+                const requiredScale = Math.max(scaleX, scaleY);
+                
+                cropData.zoom = requiredScale;
+                currentZoom = requiredScale;
+                updateZoomSlider();
+            }
+            
+            // Store changes in session and pending changes
+            sessionCropData[listingId][imageIndex] = { ...cropData };
+            pendingCropChanges[`${listingId}-${imageIndex}`] = { ...cropData };
+            savePendingCropChanges();
+            
+            updateImageTransform();
+            updateThumbnailVisuals(listingId, imageIndex);
+            showGrid();
+        }
+
+        function updateRotationSlider() {
+            const slider = document.getElementById('rotationSlider');
+            const rotationValue = document.getElementById('rotationValue');
+            
+            if (slider) {
+                let sliderVal = currentRotation;
+                if (sliderVal > 180) sliderVal -= 360;
+                slider.value = sliderVal;
+            }
+            
+            if (rotationValue) {
+                let displayVal = currentRotation;
+                if (displayVal > 180) displayVal -= 360;
+                rotationValue.textContent = `${displayVal}°`;
+            }
+        }
+
+        function turnImage() {
+            const popup = document.getElementById('cropPopup');
+            if (!popup) return;
+            
+            const listingId = parseInt(popup.dataset.listingId);
+            const imageIndex = parseInt(popup.dataset.imageIndex || '0');
+            
+            const zoomOverlay = document.getElementById('zoomSliderOverlay');
+            const zoomButton = document.getElementById('zoomToggleBtn');
+            const rotationOverlay = document.getElementById('rotationSliderOverlay');
+            const rotateButton = document.getElementById('rotateBtn');
+            
+            if (zoomOverlay && zoomOverlay.classList.contains('active')) {
+                zoomOverlay.classList.remove('active');
+                if (zoomButton) zoomButton.classList.remove('active');
+            }
+            
+            if (rotationOverlay && rotationOverlay.classList.contains('active')) {
+                rotationOverlay.classList.remove('active');
+                if (rotateButton) rotateButton.classList.remove('active');
+            }
+            
+            const roundedRotation = Math.round(currentRotation / 90) * 90;
+            currentRotation = (roundedRotation + 90) % 360;
+            cropData.rotation = currentRotation;
+            
+            if (currentRotation === 90 || currentRotation === 270) {
+                cropData.zoom = 1.33;
+                currentZoom = 1.33;
+                updateZoomSlider();
+            } else {
+                cropData.zoom = 1;
+                currentZoom = 1;
+                updateZoomSlider();
+            }
+            
+            // Store changes in session and pending changes
+            sessionCropData[listingId][imageIndex] = { ...cropData };
+            pendingCropChanges[`${listingId}-${imageIndex}`] = { ...cropData };
+            savePendingCropChanges();
+            
+            updateImageTransform();
+            updateThumbnailVisuals(listingId, imageIndex);
+            showGrid();
+        }
+
+        function enhanceImage() {
+            console.log('Crop tool activated');
+            showGrid();
+        }
+
+        function addPhoto() {
+            const popup = document.getElementById('cropPopup');
+            if (!popup) return;
+            
+            const listingId = parseInt(popup.dataset.listingId);
+            const listing = listings.find(l => l.id === listingId);
+            
+            if (!listing) return;
+            
+            // Check if we've reached the limit
+            if (listing.images.length >= 9) {
+                alert('Maximum of 9 images allowed per listing');
+                return;
+            }
+            
+            // Show loading animation in popup
+            const container = document.getElementById('popup-thumbnails-container');
+            const addButton = container?.querySelector('.add-photo-btn');
+            if (addButton) {
+                const loadingThumbnail = document.createElement('div');
+                loadingThumbnail.className = 'popup-loading-thumbnail';
+                loadingThumbnail.style.cssText = `
+                    aspect-ratio: 3/4;
+                    width: 40px;
+                    border: 1px solid #E4DBD6;
+                    border-radius: 8px;
+                    background: #f3f4f6;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: relative;
+                `;
+                loadingThumbnail.innerHTML = `
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                `;
+                addButton.replaceWith(loadingThumbnail);
+            }
+            
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.accept = 'image/*';
+            
+            input.onchange = async (e) => {
+                const files = Array.from(e.target.files);
+                if (files.length === 0) {
+                    // Restore add button if no files selected
+                    const loadingThumbnail = container?.querySelector('.popup-loading-thumbnail');
+                    if (loadingThumbnail) {
+                        const newAddButton = createPopupAddButton();
+                        loadingThumbnail.replaceWith(newAddButton);
+                    }
+                    return;
+                }
+                
+                // Calculate how many more images we can add
+                const remainingSlots = 9 - listing.images.length;
+                const filesToUpload = files.slice(0, remainingSlots);
+                
+                if (files.length > remainingSlots) {
+                    alert(`Only ${remainingSlots} more image(s) can be added. Maximum is 9 images per listing.`);
+                }
+                
+                const currentImageIndex = parseInt(popup.dataset.imageIndex || '0');
+                const originalImageCount = listing.images.length;
+                
+                const uploadResults = [];
+                for (const file of filesToUpload) {
+                    const result = await listing.uploadImage(file);
+                    uploadResults.push(result);
+                }
+                
+                const successfulUploads = uploadResults.filter(result => result && result.success);
+                
+                // Remove loading animation
+                const loadingThumbnail = container?.querySelector('.popup-loading-thumbnail');
+                if (loadingThumbnail) {
+                    loadingThumbnail.remove();
+                }
+                
+                if (successfulUploads.length > 0) {
+                    const lastAddedImageIndex = originalImageCount + successfulUploads.length - 1;
+                    
+                    popup.dataset.imageIndex = lastAddedImageIndex;
+                    
+                    const cropImage = document.getElementById('cropImage');
+                    const newImage = listing.images[lastAddedImageIndex];
+                    if (cropImage && newImage) {
+                        cropImage.src = newImage.workingUrl;
+                        
+                        cropData = {
+                            zoom: 1,
+                            rotation: 0,
+                            offsetX: 0,
+                            offsetY: 0,
+                            cropBox: { x: 0, y: 0, width: 100, height: 100 },
+                            originalImageDimensions: { width: 0, height: 0 }
+                        };
+                        currentZoom = 1;
+                        currentRotation = 0;
+                        
+                        const slider = document.getElementById('zoomSlider');
+                        if (slider) {
+                            slider.value = 100;
+                        }
+                        const zoomValue = document.getElementById('zoomValue');
+                        if (zoomValue) {
+                            zoomValue.textContent = '100%';
+                        }
+                        
+                        cropImage.onload = function() {
+                            cropData.originalImageDimensions = {
+                                width: this.naturalWidth,
+                                height: this.naturalHeight
+                            };
+                            updateImageTransform();
+                        };
+                    }
+                    
+                    updatePopupThumbnails(listingId, lastAddedImageIndex);
+                    updateListingThumbnails(listingId);
+                    
+                    // Scroll to show the newly added thumbnail
+                    setTimeout(() => {
+                        const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+                        if (thumbnailsContainer) {
+                            // Scroll to the end to show the new thumbnail and add button
+                            thumbnailsContainer.scrollLeft = thumbnailsContainer.scrollWidth;
+                        }
+                    }, 100);
+                } else {
+                    alert('Failed to upload images');
+                    // Restore add button on failure
+                    updatePopupAddButton(listingId);
+                }
+            };
+            
+            input.click();
+        }
+
+        function updateListingThumbnails(listingId) {
+            const listing = listings.find(l => l.id === listingId);
+            if (!listing) return;
+            
+            const listingElement = document.querySelector(`[data-listing-id="${listingId}"]`);
+            if (!listingElement) return;
+            
+            const imageContainer = listingElement.querySelector('.flex.gap-3.mb-4');
+            if (!imageContainer) return;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = listing.renderImageThumbnails(listing.images[0]);
+            
+            if (tempDiv.firstElementChild) {
+                imageContainer.replaceWith(tempDiv.firstElementChild);
+            }
+        }
+
+        function updateImageTransform() {
+            const image = document.getElementById('cropImage');
+            if (!image) return;
+            
+            image.style.transform = `
+                translate(${cropData.offsetX}px, ${cropData.offsetY}px) 
+                rotate(${cropData.rotation}deg) 
+                scale(${cropData.zoom})
+            `;
+            image.style.transition = 'none';
+            image.style.cursor = cropData.zoom > 1 ? 'grab' : 'default';
+        }
+
+        function resetImageTransform() {
+            const image = document.getElementById('cropImage');
+            if (image) {
+                image.style.transform = '';
+                image.style.cursor = 'default';
+            }
+        }
+
+        function setupCropStyles() {
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                    20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                    80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                    100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                }
+                
+                #cropImage {
+                    transform-origin: center center;
+                    max-width: none;
+                    max-height: none;
+                    user-select: none;
+                }
+                
+                .crop-success-message {
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background-color: #10b981;
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    z-index: 10000;
+                }
+                
+                /* Zoom Slider Overlay Styles */
+                .zoom-slider-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: #E4DBD6;
+                    padding: 30px 20px;
+                    height: 165px;
+                    display: none;
+                    align-content: center;
+                    z-index: 100;
+                    border-radius: 20px;
+                }
+
+                .zoom-slider-overlay.active {
+                    display: block;
+                }
+
+                .overlay-close-btn, .crop-popup-close-btn {
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    border-radius: 50%;
+                    background: transparent;
+                    border: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: opacity 0.2s;
+                }
+
+                .overlay-close-btn:hover {
+                    opacity: 0.7;
+                }
+
+                .overlay-close-btn svg, .crop-popup-close-btn svg {
+                    width: 24px;
+                    height: 24px;
+                    stroke: #333;
+                    stroke-width: 2.5;
+                }
+
+                .zoom-slider-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                }
+
+                .zoom-slider-track {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex: 1;
+                    width: 100%;
+                }
+
+                .zoom-slider {
+                    flex: 1;
+                    height: 6px;
+                    -webkit-appearance: none;
+                    appearance: none;
+                    background: white;
+                    border-radius: 3px;
+                    outline: none;
+                }
+
+                .zoom-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 28px;
+                    height: 28px;
+                    background: #48110C;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                }
+
+                .zoom-slider::-moz-range-thumb {
+                    width: 28px;
+                    height: 28px;
+                    background: #7F1D1D;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                    border: none;
+                }
+
+                .zoom-value {
+                    min-width: 30px;
+                    text-align: right;
+                    flex-shrink: 0;
+                }
+                
+                #zoomToggleBtn.active {
+                background: #E4DBD6;
+                }
+
+                .rotation-slider-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: #E4DBD6;
+                    padding: 30px 20px;
+                    height: 167px;
+                    display: none;
+                    align-content: center;
+                    z-index: 100;
+                    border-radius: 20px;
+                }
+
+                .rotation-slider-overlay.active {
+                    display: block;
+                }
+
+                .rotation-close-btn {
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    border-radius: 50%;
+                    background: transparent;
+                    border: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: opacity 0.2s;
+                }
+
+                .rotation-slider-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                }
+
+                .rotation-slider-track {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex: 1;
+                    width: 100%;
+                }
+
+                .rotation-slider {
+                    flex: 1;
+                    height: 6px;
+                    -webkit-appearance: none;
+                    appearance: none;
+                    background: white;
+                    border-radius: 3px;
+                    outline: none;
+                }
+
+                .rotation-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 28px;
+                    height: 28px;
+                    background: #48110C;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+                }
+
+                .rotation-value {
+                    min-width: 30px;
+                    text-align: right;
+                    flex-shrink: 0;
+                }
+                
+                #rotateBtn.active {
+                    background: #E4DBD6;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Handle escape key for category overlay
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const categoryOverlay = document.getElementById('category-overlay');
+                if (categoryOverlay && categoryOverlay.classList.contains('active')) {
+                    closeCategoryOverlay();
+                }
+                
+                const popup = document.getElementById('cropPopup');
+                if (popup && popup.classList.contains('active')) {
+                    closeCropPopup();
+                }
+            }
+        });
+
+        // Cancel functionality
+        function showCancelConfirmation() {
+            const modal = document.getElementById('cancel-modal');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function closeCancelModal() {
+            const modal = document.getElementById('cancel-modal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        async function confirmCancel() {
+            const modal = document.getElementById('cancel-modal');
+            const modalContent = modal.querySelector('.modal-content');
+            modalContent.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+                    <p class="text-gray-600">Deleting images and clearing session data...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/api/clear-listing-session/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_key: sessionStorage.getItem('session_key') || null
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    sessionStorage.removeItem('listings');
+                    sessionStorage.removeItem('fromSelection');
+                    sessionStorage.removeItem('selectedIndices');
+                    sessionStorage.removeItem('pendingDetection');
+                    sessionStorage.removeItem('detectionResults');
+                    sessionStorage.removeItem('uploadedImages');
+                    sessionStorage.removeItem('session_key');
+                    
+                    window.location.href = '/listings/create_item/'; 
+                } else {
+                    console.error('Failed to clear session:', result.error);
+                    alert('Error clearing session. Redirecting anyway...');
+                    window.location.href = '/listings/create_item/';
+                }
+            } catch (error) {
+                console.error('Error clearing session:', error);
+                alert('Error clearing session. Redirecting anyway...');
+                window.location.href = '/listings/create_item/';
+            }
+        }
+
+        // UI Helper functions
+        function showLoadingMessage(listingId, message) {
+            const container = document.getElementById(`status-container-${listingId}`);
+            if (!container) return;
+            
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = `loading-${listingId}`;
+            loadingDiv.className = 'bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4';
+            loadingDiv.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <div class="text-blue-800 text-sm font-medium">${message}</div>
+                </div>
+            `;
+            container.innerHTML = '';
+            container.appendChild(loadingDiv);
+        }
+
+        function showDetectionLoading(listingId) {
+            showLoadingMessage(listingId, 'Uploading...');
+        }
+        
+        function showInlineImageLoading(listingId) {
+            const listingElement = document.querySelector(`[data-listing-id="${listingId}"]`);
+            if (!listingElement) return;
+            
+            const imageContainer = listingElement.querySelector('.flex.gap-3.mb-4');
+            
+            if (!imageContainer) {
+                // If no image container exists yet, create one with loading animation
+                const statusContainer = document.getElementById(`status-container-${listingId}`);
+                if (statusContainer) {
+                    const loadingImageSection = document.createElement('div');
+                    loadingImageSection.className = 'main-thumb';
+                    loadingImageSection.innerHTML = `
+                        <div class="bg-gray-100 rounded-lg overflow-hidden animate-pulse" style="width: 88px; height: 118px; position: relative;">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-600"></div>
+                            </div>
+                        </div>
+                    `;
+                    statusContainer.insertAdjacentElement('afterend', loadingImageSection);
+                }
+            } else {
+                // Add loading animation next to existing thumbnails
+                const loadingThumbnail = document.createElement('div');
+                loadingThumbnail.className = 'loading-image-placeholder';
+                loadingThumbnail.style.cssText = `
+                    aspect-ratio: 3/4;
+                    width: 88px;
+                    border: 1px solid #E4DBD6;
+                    border-radius: 8px;
+                    background: #f3f4f6;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: relative;
+                    flex-shrink: 0;
+                `;
+                loadingThumbnail.innerHTML = `
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-600"></div>
+                `;
+                
+                // Find the best position to insert the loading animation
+                const addButton = imageContainer.querySelector('.add-photo-main-btn');
+                const moreButton = imageContainer.querySelector('.bg-gray-200');
+                
+                if (addButton) {
+                    // Replace add button with loading animation
+                    addButton.replaceWith(loadingThumbnail);
+                } else if (moreButton) {
+                    // Insert before the "more" button
+                    moreButton.parentNode.insertBefore(loadingThumbnail, moreButton);
+                } else {
+                    // Append to the end of the container
+                    imageContainer.appendChild(loadingThumbnail);
+                }
+            }
+        }
+
+        function hideInlineImageLoading(listingId) {
+            const listingElement = document.querySelector(`[data-listing-id="${listingId}"]`);
+            if (!listingElement) return;
+            
+            // Remove loading placeholder
+            const loadingPlaceholder = listingElement.querySelector('.loading-image-placeholder');
+            if (loadingPlaceholder) {
+                loadingPlaceholder.remove();
+            }
+            
+            // Remove temporary loading section if it exists and has no real images
+            const tempLoadingSection = listingElement.querySelector('.flex.gap-3.mb-4 .animate-pulse')?.closest('.flex.gap-3.mb-4');
+            if (tempLoadingSection && !tempLoadingSection.querySelector('[data-image-index]')) {
+                tempLoadingSection.remove();
+            }
+        }
+
+
+        function hideDetectionLoading(listingId) {
+            const loadingDiv = document.getElementById(`detection-loading-${listingId}`);
+            if (loadingDiv) loadingDiv.remove();
+        }
+
+        function showDetectionSuccess(listingId, results) {
+            hideDetectionLoading(listingId);
+            const container = document.getElementById(`status-container-${listingId}`);
+            if (!container) return;
+            
+            const successDiv = document.createElement('div');
+            successDiv.id = `detection-success-${listingId}`;
+            successDiv.className = 'bg-green-50 border border-green-200 rounded-lg p-4 mb-4 relative';
+            
+            const totalObjects = results?.detected_objects?.length || results?.unique_items?.length || 0;
+            
+            successDiv.innerHTML = `
+                <button onclick="closeDetectionSuccess(${listingId})" 
+                        class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                
+                <div class="flex items-start space-x-3">
+                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="flex-1">
+                        <div class="text-green-800 text-sm font-medium">
+                            We found ${totalObjects} potential listing${totalObjects !== 1 ? 's' : ''}.
+                            <br>
+                            <a href="#" onclick="proceedToSelection(event, ${listingId})" 
+                            class="text-green-700 underline hover:text-green-900 ml-1">
+                                Generate Listings →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = '';
+            container.appendChild(successDiv);
+        }
+
+        function closeDetectionSuccess(listingId) {
+            const successDiv = document.getElementById(`detection-success-${listingId}`);
+            if (successDiv) {
+                successDiv.remove();
+            }
+        }
+
+        function proceedToSelection(event, listingId) {
+            event.preventDefault();
+            
+            const container = document.getElementById(`status-container-${listingId}`);
+            if (container) {
+                container.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                            <div class="text-blue-800 text-sm">Preparing selection screen...</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            setTimeout(() => {
+                window.location.href = '/listings/select_items/';
+            }, 300);
+        }
+
+        function displayDetectionResults(listingId, results) {
+            if (results.error) {
+                showDetectionError(listingId, results.error);
+                return;
+            }
+            
+            const container = document.getElementById(`status-container-${listingId}`);
+            if (!container) return;
+            
+            const resultsDiv = document.createElement('div');
+            resultsDiv.id = `detection-results-${listingId}`;
+            resultsDiv.className = 'bg-green-50 border border-green-200 rounded-lg p-4 mb-4';
+            
+            const detailedItems = results.detected_objects?.map(obj => {
+                const confidence = Math.round(obj.confidence * 100);
+                return `
+                    <div class="flex items-center gap-2 py-1">
+                        <span class="text-green-700">•</span>
+                        <span class="font-medium">${obj.category}</span>
+                        <span class="text-green-600 text-xs">(${confidence}%)</span>
+                    </div>
+                `;
+            }).join('') || '<div>None detected</div>';
+            
+            resultsDiv.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="flex-1">
+                        <div class="text-green-800 text-sm font-medium">Fashion Detection Complete</div>
+                        <div class="text-green-700 text-xs mt-2">
+                            ${detailedItems}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = '';
+            container.appendChild(resultsDiv);
+        }
+
+        function showDetectionError(listingId, error) {
+            const container = document.getElementById(`status-container-${listingId}`);
+            if (!container) return;
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'bg-red-50 border border-red-200 rounded-lg p-4 mb-4';
+            errorDiv.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414-1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="text-red-800 text-sm">Detection failed: ${error}</div>
+                </div>
+            `;
+            container.innerHTML = '';
+            container.appendChild(errorDiv);
+        }
+
+        function toggleDotsMenu(id) {
+            if (window.event) {
+                window.event.stopPropagation();
+            }
+            
+            const popoverId = `dots-popover-${id}`;
+            const popover = document.getElementById(popoverId);
+            
+            if (!popover) {
+                console.error(`Popover ${popoverId} not found!`);
+                return;
+            }
+            
+            const wasActive = popover.classList.contains('active');
+            
+            // Close all popovers
+            document.querySelectorAll('.dots-popover').forEach(p => {
+                p.classList.remove('active');
+            });
+            
+            // Toggle this one
+            if (!wasActive) {
+                popover.classList.add('active');
+            }
+        }
+
+        function handleClickOutside(event) {
+            if (!event.target.closest('.dots-menu')) {
+                document.querySelectorAll('.dots-popover').forEach(p => {
+                    p.classList.remove('active');
+                });
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function closeModal() {
+            window.location.href = '/marketplace/';
+        }
+    </script>
+
+</body>
+</html>
+
+{% endblock %}
+

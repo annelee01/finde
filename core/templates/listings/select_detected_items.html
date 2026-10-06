@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Items to List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .item-card {
+            transition: all 0.2s ease;
+        }
+        .item-card.selected {
+            background-color: #f3f4f6;
+            border-color: #3b82f6;
+        }
+        .checkbox-custom {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .checkbox-custom.checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .checkbox-custom.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+        }
+        .thumbnail-container {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #d8d8d8;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .thumbnail-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-md mx-auto bg-white min-h-screen">
+        <!-- Header -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-b">
+            <button onclick="goBack()" class="p-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <h1 class="text-lg font-medium">Select items to list</h1>
+            <button onclick="closeModal()" class="p-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="p-4">
+            <!-- Info message -->
+            <div id="info-message" class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <div class="flex items-start space-x-2">
+                    <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div class="text-sm text-blue-800">
+                        <span id="detection-summary">Loading detected items...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items list -->
+            <div id="items-container" class="space-y-3 mb-24">
+                <!-- Items will be dynamically added here -->
+            </div>
+
+            <!-- No items message -->
+            <div id="no-items" class="hidden text-center py-8">
+                <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-gray-500">No items detected</p>
+                <button onclick="goBack()" class="mt-4 text-blue-600 underline">Go back and try again</button>
+            </div>
+        </div>
+
+        <!-- Bottom buttons -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-4">
+            <div class="max-w-md mx-auto flex gap-3">
+                <button onclick="cancel()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-full font-medium">
+                    Cancel
+                </button>
+                <button id="next-btn" onclick="proceedWithSelection()" disabled class="flex-1 bg-gray-300 text-gray-500 py-3 rounded-full font-medium transition-colors">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let detectionResults = null;
+        let uploadedImages = null;
+        let metadata = null;
+        let selectedItems = new Set();
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            loadDetectionData();
+        });
+
+        function loadDetectionData() {
+            // Retrieve data from sessionStorage
+            const storedResults = sessionStorage.getItem('detectionResults');
+            const storedImages = sessionStorage.getItem('uploadedImages');
+            const storedMetadata = sessionStorage.getItem('uploadMetadata');
+
+            if (!storedResults) {
+                showNoItemsMessage();
+                return;
+            }
+
+            try {
+                detectionResults = JSON.parse(storedResults);
+                uploadedImages = storedImages ? JSON.parse(storedImages) : [];
+                metadata = storedMetadata ? JSON.parse(storedMetadata) : {};
+                
+                displayDetectedItems();
+            } catch (error) {
+                console.error('Error parsing stored data:', error);
+                showNoItemsMessage();
+            }
+        }
+
+        function displayDetectedItems() {
+            const container = document.getElementById('items-container');
+            const detectedObjects = detectionResults.detected_objects || [];
+            
+            if (detectedObjects.length === 0) {
+                showNoItemsMessage();
+                return;
+            }
+
+            // Update summary
+            const summaryText = `We detected ${detectedObjects.length} item${detectedObjects.length !== 1 ? 's' : ''} in your image${uploadedImages.length > 1 ? 's' : ''}. Select the items you want to list.`;
+            document.getElementById('detection-summary').textContent = summaryText;
+
+            // Clear container
+            container.innerHTML = '';
+
+            // Create item cards
+            detectedObjects.forEach((item, index) => {
+                const itemCard = createItemCard(item, index);
+                container.appendChild(itemCard);
+            });
+        }
+
+        function createItemCard(item, index) {
+            const card = document.createElement('div');
+            card.className = 'item-card bg-white rounded-lg border-2 border-gray-200 p-4 cursor-pointer transition-all';
+            card.dataset.index = index;
+            
+            const confidence = Math.round(item.confidence * 100);
+            const colors = item.colors || [item.primary_color] || ['Unknown'];
+            const hexColors = item.color_hexes || [item.primary_color_hex] || ['#808080'];
+            
+            // Create color swatches
+            const colorSwatches = colors.map((color, idx) => {
+                const hex = hexColors[idx] || '#808080';
+                return `
+                    <span class="inline-flex items-center gap-1">
+                        <span class="inline-block w-3 h-3 rounded border border-gray-300" 
+                            style="background-color: ${hex};"></span>
+                        <span class="text-xs text-gray-600">${color}</span>
+                    </span>
+                `;
+            }).join(' ');
+
+            // Create cropped image from bounding box if coordinates are available
+            let imageElement = '';
+            
+            if (item.bounding_box && uploadedImages.length > 0) {
+                imageElement = `
+                    <div class="thumbnail-container">
+                        <canvas id="canvas-${index}" class="thumbnail-image"></canvas>
+                    </div>
+                `;
+                
+                // Crop the image after the card is added to DOM
+                setTimeout(() => cropImageToBoundingBox(item, index), 10);
+            } else if (item.cropped_image) {
+                imageElement = `
+                    <div class="thumbnail-container">
+                        <img src="${item.cropped_image.startsWith('data:') ? item.cropped_image : 'data:image/jpeg;base64,' + item.cropped_image}" 
+                            class="thumbnail-image" 
+                            alt="${item.category}">
+                    </div>
+                `;
+            } else {
+                imageElement = `
+                    <div class="thumbnail-container">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                `;
+            }
+            
+            card.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <div class="checkbox-custom" id="checkbox-${index}"></div>
+                    
+                    ${imageElement}
+                    
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900 capitalize">${item.category}</div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            <div>Confidence: ${confidence}%</div>
+                            <div class="mt-1 flex flex-wrap gap-1">${colorSwatches}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            card.onclick = () => toggleItemSelection(index);
+            
+            return card;
+        }
+
+        function cropImageToBoundingBox(item, index) {
+            if (!item.bounding_box) return;
+        
+            const canvas = document.getElementById(`canvas-${index}`);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = function() {
+                // Bounding box cropping logic remains the same...
+                let x1, y1, x2, y2;
+                
+                if (Array.isArray(item.bounding_box)) {
+                    [x1, y1, x2, y2] = item.bounding_box;
+                } else if (typeof item.bounding_box === 'object') {
+                    x1 = item.bounding_box.x1 || item.bounding_box.x;
+                    y1 = item.bounding_box.y1 || item.bounding_box.y;
+                    x2 = item.bounding_box.x2 || (item.bounding_box.x + item.bounding_box.width);
+                    y2 = item.bounding_box.y2 || (item.bounding_box.y + item.bounding_box.height);
+                }
+                
+                // Calculate crop dimensions
+                const cropWidth = x2 - x1;
+                const cropHeight = y2 - y1;
+                
+                // Add some padding around the bounding box (5% on each side)
+                const padding = 0.05;
+                const paddingX = cropWidth * padding;
+                const paddingY = cropHeight * padding;
+                
+                // Adjust coordinates with padding (but stay within image bounds)
+                const adjustedX1 = Math.max(0, x1 - paddingX);
+                const adjustedY1 = Math.max(0, y1 - paddingY);
+                const adjustedX2 = Math.min(img.width, x2 + paddingX);
+                const adjustedY2 = Math.min(img.height, y2 + paddingY);
+                
+                const adjustedWidth = adjustedX2 - adjustedX1;
+                const adjustedHeight = adjustedY2 - adjustedY1;
+                
+                // Set canvas size to maintain aspect ratio
+                const aspectRatio = adjustedWidth / adjustedHeight;
+                const maxSize = 160;
+                let canvasWidth, canvasHeight;
+                
+                if (aspectRatio > 1) {
+                    canvasWidth = maxSize;
+                    canvasHeight = maxSize / aspectRatio;
+                } else {
+                    canvasHeight = maxSize;
+                    canvasWidth = maxSize * aspectRatio;
+                }
+                
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+                
+                // Draw the cropped portion onto the canvas
+                ctx.drawImage(
+                    img,
+                    adjustedX1, adjustedY1, adjustedWidth, adjustedHeight,
+                    0, 0, canvasWidth, canvasHeight
+                );
+            };
+            
+            // Use the TempImage URL directly
+            if (item.source_image_url) {
+                // This is now a TempImage URL, not base64
+                img.src = item.source_image_url;
+            } else {
+                // Fallback to uploaded images
+                const sourceImageIndex = item.source_image_index || 0;
+                if (uploadedImages && uploadedImages[sourceImageIndex]) {
+                    const sourceImage = uploadedImages[sourceImageIndex];
+                    img.src = sourceImage.workingUrl || sourceImage.url || sourceImage.data;
+                }
+            }
+        }
+
+        function toggleItemSelection(index) {
+            const card = document.querySelector(`[data-index="${index}"]`);
+            const checkbox = document.getElementById(`checkbox-${index}`);
+            
+            if (selectedItems.has(index)) {
+                selectedItems.delete(index);
+                card.classList.remove('selected');
+                checkbox.classList.remove('checked');
+            } else {
+                selectedItems.add(index);
+                card.classList.add('selected');
+                checkbox.classList.add('checked');
+            }
+
+            updateNextButton();
+        }
+
+        function updateNextButton() {
+            const nextBtn = document.getElementById('next-btn');
+            
+            if (selectedItems.size > 0) {
+                nextBtn.disabled = false;
+                nextBtn.className = 'flex-1 bg-red-900 text-white py-3 rounded-full font-medium transition-colors';
+            } else {
+                nextBtn.disabled = true;
+                nextBtn.className = 'flex-1 bg-gray-300 text-gray-500 py-3 rounded-full font-medium transition-colors';
+            }
+        }
+
+        function showNoItemsMessage() {
+            const container = document.getElementById('items-container');
+            const infoMessage = document.getElementById('info-message');
+            const noItems = document.getElementById('no-items');
+            
+            if (container) container.classList.add('hidden');
+            if (infoMessage) infoMessage.classList.add('hidden');
+            if (noItems) noItems.classList.remove('hidden');
+        }
+
+        function proceedWithSelection() {
+            if (selectedItems.size === 0) {
+                alert('Please select at least one item to continue');
+                return;
+            }
+
+            // Store selected indices instead of full data
+            const selectedIndices = Array.from(selectedItems);
+            
+            try {
+                // Store just the indices
+                sessionStorage.setItem('selectedIndices', JSON.stringify(selectedIndices));
+                sessionStorage.setItem('fromSelection', 'true');
+                
+                // Detection results and images are already stored separately
+                // No need to duplicate them
+                
+                window.location.href = '/listings/create_item';
+            } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                    // Clear some old data and try again
+                    sessionStorage.removeItem('detectionResults');
+                    sessionStorage.setItem('selectedIndices', JSON.stringify(selectedIndices));
+                    sessionStorage.setItem('fromSelection', 'true');
+                    window.location.href = '/listings/create_item';
+                }
+            }
+        }
+
+        function cancel() {
+            if (confirm('Are you sure you want to cancel? Your detection results will be lost.')) {
+                clearSessionData();
+                window.location.href = '/listings/create_item';
+            }
+        }
+
+        function goBack() {
+            // Go back to the upload page
+            window.location.href = '/listings/create_item';
+        }
+
+        function closeModal() {
+            if (confirm('Are you sure you want to close? Your progress will be lost.')) {
+                clearSessionData();
+                window.location.href = '/';
+            }
+        }
+
+        function clearSessionData() {
+            sessionStorage.removeItem('detectionResults');
+            sessionStorage.removeItem('uploadedImages');
+            sessionStorage.removeItem('uploadMetadata');
+            sessionStorage.removeItem('selectedItems');
+            sessionStorage.removeItem('fromSelection');
+            sessionStorage.removeItem('selectedIndices');
+            sessionStorage.removeItem('pendingDetection');
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

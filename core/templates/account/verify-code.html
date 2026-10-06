@@ -1,0 +1,53 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Verify Code{% endblock %}
+
+<head>
+
+    <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+
+</head>
+
+{% block content %}
+
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <p class="text-xl font-semibold mb-4">Verify Your Email Change</p>
+    <p class="pb-4">We've sent a 6-digit code to your email. Didn't get the code? Check your spam folder or <a href="?action=resend" class="text-blue-600 hover:underline">resend code.</a></p>
+
+
+    <div style="max-width: 280px; width: 100%;">
+        {{ form.as_p }}
+    </div>
+    <button type="submit" class="button-dark" style="margin-top: 1rem; display: inline-flex; align-items: left;">
+        Verify Code
+    </button>  
+
+</form>
+
+
+
+<script>
+    // Restrict code verification input to digits only
+    // This script will remove any non-digit characters from the input field
+    document.addEventListener("DOMContentLoaded", function () {
+      const input = document.querySelector('input[name="code"]');
+      if (input) {
+        input.addEventListener("input", function () {
+          this.value = this.value.replace(/\D/g, ""); // Remove non-digits
+        });
+      }
+    });
+  </script>
+
+{% endblock %}

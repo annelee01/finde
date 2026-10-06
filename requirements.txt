@@ -1,0 +1,39 @@
+# Runtime dependencies for the Finde web app.
+# Optional computer-vision dependencies live in requirements-ml.txt.
+
+# Django and extensions
+Django==5.0.7
+django-allauth==64.2.1
+django-cron==0.6.0
+django-filter==25.1
+django-opensearch-dsl==0.6.2
+django-otp==1.5.4
+django-ratelimit==4.1.0
+django-storages==1.14.6
+djangorestframework==3.15.2
+whitenoise==6.9.0
+
+# Google sign-in (required by allauth's Google provider)
+cryptography==43.0.1
+PyJWT==2.9.0
+
+# Data stores
+opensearch-py==2.8.0
+PyMySQL==1.1.1
+redis==6.4.0
+
+# AWS (S3 media storage, SigV4-signed OpenSearch requests)
+boto3==1.35.27
+
+# Integrations and utilities
+anthropic==0.64.0
+fuzzywuzzy==0.18.0
+pillow==10.4.0
+python-decouple==3.8
+python-dotenv==1.0.1
+python-Levenshtein==0.26.1
+pytz==2024.2
+requests==2.32.3
+
+# Production server
+gunicorn==21.2.0

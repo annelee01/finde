@@ -1,0 +1,137 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<script type="module" src="{% static 'js/favorite.js' %}"></script>
+
+<div style="margin-bottom: 3rem; text-align: center;" class="grid justify-center">
+
+    <div class="profile-picture grid justify-center" style="margin-bottom: .5rem;">
+        {% if user.profile.profile_picture %}
+            <img src="{{ user.profile.profile_picture.url }}" 
+                    alt="Profile Picture" 
+                    style="height:8rem;width: 6.75rem; border-radius:50%; object-fit:cover;"
+                    />
+        {% else %}
+            <div style="height:8rem;width: 6.75rem;border-radius:50%;" class="bg-gray-300 flex items-center rounded-full">
+                <p style="font-size: 48px; padding-bottom:10px; margin:auto;">{{ user.username|slice:":1" }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if user.is_authenticated and user == request.user %}
+        <a href="{% url 'core:account' %}" class="button-light" style="margin: .6rem auto .35rem auto; max-width:200px;">Account Settings</a>
+    {% endif %}
+
+    <h1 style="margin-bottom: .15rem;">{{ user.username }}</h1>  
+
+    <div style="display: flex; justify-content: center; margin-bottom: .5rem; align-items: baseline;">
+        <p class="body-semibold" style="margin: 0 .25rem;">{{ user.first_name }}</p>
+        <p style="opacity: 65%; margin: 0 .25rem;">{{ user.profile.location }}</p>
+    </div>
+
+    <p style="max-width:500px; margin: 0 auto;">{{ user.profile.bio }}</p>
+
+</div>
+
+<!-- Section for IN_STOCK items. render these here (instead of dynamic javascript) for SEO -->
+<div class="columns-2 md:columns-4 lg:columns-7" style="text-align: left; margin-bottom: 1rem;">
+    {% for item in in_stock_items %}
+    <div class="item-container" style="margin-bottom: 1rem;" data-itemid="{{ item.item_id }}">
+        <div class="image-wrapper">
+            <img src="{{ MEDIA_URL }}{{ item.gallery_url }}" alt="{{ item.title }}">
+            <div class="overlay">
+                <a href="{{ item.item_web_url }}" target="_blank"><button class="overlay-button-visit-site-favorite">Visit</button></a>
+                <button class="overlay-button {% if item.item_id in logged_in_user_favorited_ids %}favorited{% endif %}"
+                        data-item-id="{{ item.item_id }}">
+                    {% if item.item_id in logged_in_user_favorited_ids %}
+                        <!-- Filled Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <rect width="24" height="24"/>
+                            <path d="M12 20.4001L10.6725 19.1916C5.95753 14.9161 2.84473 12.0962 2.84473 8.63552C2.84473 5.81568 5.06031 3.6001 7.88015 3.6001C9.47317 3.6001 11.0021 4.34168 12 5.51356C12.998 4.34168 14.5269 3.6001 16.1199 3.6001C18.9398 3.6001 21.1554 5.81568 21.1554 8.63552C21.1554 12.0962 18.0425 14.9161 13.3276 19.2008L12 20.4001Z" fill="#48110C"/>
+                        </svg>
+                    {% else %}
+                        <!-- Unfilled Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M16.1201 4.1001C18.6636 4.10019 20.6551 6.09175 20.6553 8.63525C20.6553 10.2014 19.9552 11.6615 18.6221 13.2925C17.2834 14.9302 15.3594 16.6785 12.9922 18.8296L12.001 19.7251L11.0088 18.8218V18.8208L9.31836 17.2817C7.7155 15.8082 6.382 14.519 5.37793 13.2915C4.04495 11.6618 3.34473 10.2014 3.34473 8.63525C3.34487 6.09178 5.3364 4.10024 7.87988 4.1001C9.32138 4.1001 10.713 4.77349 11.6191 5.8374L12 6.28467L12.3809 5.8374C13.287 4.77347 14.6786 4.1001 16.1201 4.1001Z" stroke="black"/>
+                        </svg>
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Section for ENDED items -->
+<div class="columns-2 md:columns-4 lg:columns-7" style="text-align: left; margin-bottom: 1rem;">
+    {% for item in ended_items %}
+    <div class="item-container item-unavailable" style="margin-bottom: 1rem;" data-itemid="{{ item.item_id }}">
+        <div class="image-wrapper">
+            <a href="{{ item.item_web_url }}" target="_blank"> 
+                <div class="overlay"></div>
+                <img src="{{ MEDIA_URL }}{{ item.gallery_url }}" alt="{{ item.title }}" draggable="false">
+                <span class="overlay-text">Ended</span>
+                <div class="overlay">
+                    <a href="{{ item.item_web_url }}" target="_blank"><button class="overlay-button-visit-site-favorite">View</button></a>
+                    <button class="overlay-button {% if item.item_id in logged_in_user_favorited_ids %}favorited{% endif %}"
+                            data-item-id="{{ item.item_id }}">
+                        {% if item.item_id in logged_in_user_favorited_ids %}
+                            <!-- Filled Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <rect width="24" height="24" fill="white"/>
+                                <path d="M12 20.4001L10.6725 19.1916C5.95753 14.9161 2.84473 12.0962 2.84473 8.63552C2.84473 5.81568 5.06031 3.6001 7.88015 3.6001C9.47317 3.6001 11.0021 4.34168 12 5.51356C12.998 4.34168 14.5269 3.6001 16.1199 3.6001C18.9398 3.6001 21.1554 5.81568 21.1554 8.63552C21.1554 12.0962 18.0425 14.9161 13.3276 19.2008L12 20.4001Z" fill="#48110C"/>
+                            </svg>
+                        {% else %}
+                            <!-- Unfilled Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M11.3457 18.4521L11.3443 18.4508C8.96665 16.2948 7.07442 14.5763 5.76456 12.9749C4.46617 11.3875 3.84473 10.0374 3.84473 8.63552C3.84473 6.36797 5.6126 4.6001 7.88015 4.6001C9.17039 4.6001 10.4244 5.20561 11.2387 6.1619L12 7.05596L12.7614 6.1619C13.5757 5.20561 14.8297 4.6001 16.1199 4.6001C18.3875 4.6001 20.1554 6.36797 20.1554 8.63552C20.1554 10.0374 19.5339 11.3875 18.2353 12.9763C16.9254 14.5789 15.0334 16.2993 12.6561 18.4597C12.6557 18.46 12.6554 18.4604 12.655 18.4607L12.0026 19.0501L11.3457 18.4521Z" fill="white" stroke="black" stroke-width="2"/>
+                            </svg>
+                        {% endif %}
+                    </button>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Section for SOLD items -->
+<div class="columns-2 md:columns-4 lg:columns-7" style="text-align: left; margin-bottom: 1rem;">
+    {% for item in sold_items %}
+    <div class="item-container item-unavailable" style="margin-bottom: 1rem;" data-itemid="{{ item.item_id }}">
+        <div class="image-wrapper">
+            <a href="{{ item.item_web_url }}" target="_blank"> 
+                <div class="overlay"></div>
+                <img src="{{ MEDIA_URL }}{{ item.gallery_url }}" alt="{{ item.title }}" draggable="false">
+                <span class="overlay-text">SOLD</span>
+                <div class="overlay">
+                    <a href="{{ item.item_web_url }}" target="_blank"><button class="overlay-button-visit-site-favorite">View</button></a>
+                    <button class="overlay-button {% if item.item_id in logged_in_user_favorited_ids %}favorited{% endif %}"
+                            data-item-id="{{ item.item_id }}">
+                        {% if item.item_id in logged_in_user_favorited_ids %}
+                            <!-- Filled Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <rect width="24" height="24" fill="white"/>
+                                <path d="M12 20.4001L10.6725 19.1916C5.95753 14.9161 2.84473 12.0962 2.84473 8.63552C2.84473 5.81568 5.06031 3.6001 7.88015 3.6001C9.47317 3.6001 11.0021 4.34168 12 5.51356C12.998 4.34168 14.5269 3.6001 16.1199 3.6001C18.9398 3.6001 21.1554 5.81568 21.1554 8.63552C21.1554 12.0962 18.0425 14.9161 13.3276 19.2008L12 20.4001Z" fill="#48110C"/>
+                            </svg>
+                        {% else %}
+                            <!-- Unfilled Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M11.3457 18.4521L11.3443 18.4508C8.96665 16.2948 7.07442 14.5763 5.76456 12.9749C4.46617 11.3875 3.84473 10.0374 3.84473 8.63552C3.84473 6.36797 5.6126 4.6001 7.88015 4.6001C9.17039 4.6001 10.4244 5.20561 11.2387 6.1619L12 7.05596L12.7614 6.1619C13.5757 5.20561 14.8297 4.6001 16.1199 4.6001C18.3875 4.6001 20.1554 6.36797 20.1554 8.63552C20.1554 10.0374 19.5339 11.3875 18.2353 12.9763C16.9254 14.5789 15.0334 16.2993 12.6561 18.4597C12.6557 18.46 12.6554 18.4604 12.655 18.4607L12.0026 19.0501L11.3457 18.4521Z" fill="white" stroke="black" stroke-width="2"/>
+                            </svg>
+                        {% endif %}
+                    </button>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+{% endblock %}
+

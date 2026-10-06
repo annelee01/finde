@@ -1,0 +1,451 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="icon" type="image/x-icon" href="https://finde-media.s3.us-east-2.amazonaws.com/favicon.ico">
+        <link rel="icon" type="image/png" sizes="16x16" href="https://finde-media.s3.us-east-2.amazonaws.com/favicon-16x16.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="https://finde-media.s3.us-east-2.amazonaws.com/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="https://finde-media.s3.us-east-2.amazonaws.com/favicon-96x96.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="https://finde-media.s3.us-east-2.amazonaws.com/apple-touch-icon.png">
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- Meta Tags to appear in Google search results -->
+        <title>Finde | Curated Vintage Fashion</title>
+        <meta name="description" content="Discover carefully curated vintage fashion pieces. Browse designer vintage, rare finds, and sustainable fashion from eBay's best sellers. Updated daily.">
+        <meta property="og:title" content="Finde - Curated Vintage Fashion">
+        <meta property="og:description" content="Discover carefully curated vintage fashion pieces. Browse designer vintage, rare finds, and sustainable fashion from eBay's best sellers.">
+        <meta property="og:image" content="https://finde.clothing/your-logo-or-hero-image.jpg">
+        
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+        <script type="module" src="{% static 'js/search_input.js' %}"></script>
+        <script type="module" src="{% static 'js/search_input_mobile_popout.js' %}"></script>
+        
+        <!-- Google analytics tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-0K4QQYK2L4"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0K4QQYK2L4');
+        </script>
+
+        <!-- Hotjar -->
+        <script>
+            (function(h,o,t,j,a,r){
+                h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+                h._hjSettings={hjid:6455264,hjsv:6};
+                a=o.getElementsByTagName('head')[0];
+                r=o.createElement('script');r.async=1;
+                r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+                a.appendChild(r);
+            })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+        </script>
+
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-0K4QQYK2L4"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0K4QQYK2L4');
+        </script>
+
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body>
+        <div class="container"></div>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div class="alert relative flex items-center bg-blue-500 text-white text-sm font-bold px-4 py-3" role="alert">
+                    {% elif message.tags == 'error' %}
+                        <div class="alert relative flex items-center bg-red-500 text-white text-sm font-bold px-4 py-3" role="alert">
+                    {% elif message.tags == 'warning' %}
+                            <div class="alert relative flex items-center bg-orange-500 text-white text-sm font-bold px-4 py-3" role="alert">
+                    {% else %}
+                        <div class="alert relative flex items-center bg-gray-500 text-white text-sm font-bold px-4 py-3" role="alert">
+                    {% endif %}
+                            {{ message }}
+                            <span class="close-alert absolute top-0 bottom-0 right-0 px-4 py-3">
+                                <svg class="fill-current h-6 w-6 text-white" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <title>Close</title>
+                                    <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+                                </svg>
+                            </span>
+                        </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block navbar %}
+            <div id="navbar">
+                <nav class="flex w-full">
+                    <!-- sidebar 
+                    <div id="mySidenav" class="sidenav body-semibold" style="padding-top: 54px;">
+                        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">
+                            <svg class="h-6 w-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+                            </svg>
+                        </a>
+                        {% if request.user.is_authenticated %}
+                            <a href="/browse/" class="navbar-right-link py-2">Browse</a>
+                            <a href="{% url 'core:profile_detail' request.user.username %}" class="navbar-right-link py-2">Profile</a>
+                            <a href="/about/" class="navbar-right-link py-2">About</a>
+                            <div style="position: absolute; bottom: 1rem; width: 100%;">
+                                <a href="{% url 'account_logout' %}" class="navbar-right-link py-2">Log Out</a>
+                            </div>
+                        {% else %}
+                            <a href="{% url 'account_login' %}" class="navbar-right-link py-2">Log In</a>
+                            <a href="/browse/" class="navbar-right-link py-2">Browse</a>
+                            <a href="/about/" class="navbar-right-link py-2">About</a>
+                        {% endif %}
+                    </div>
+
+                    <div class="navbar-left flex items-center">
+                          Left column 
+                        <div class="hamburger-icon mr-3">
+                            <span onclick="openNav()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 20" fill="none">
+                                        <g clip-path="url(#clip0_650_1339)">
+                                        <path d="M0 2.33301H24" stroke="#48110C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M0 10H24" stroke="#48110C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M0 17.667H24" stroke="#48110C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </g>
+                                        <defs>
+                                        <clipPath id="clip0_650_1339">
+                                        <rect width="24" height="19" fill="white" transform="translate(0 0.5)"/>
+                                        </clipPath>
+                                        </defs>
+                                    </svg>
+                            </span>
+                        </div>
+                            -->
+
+                    <!-- Left column -->     
+                    <div class="logo-container">
+                        <a href="/browse/" class="logo-link">
+                            finde<sup class="logo-beta gradient-text textShine">beta</sup>
+                        </a>
+                    </div>
+                                                                
+                    <!-- Center column -->
+                    <div class="navbar-center">
+
+                        <!-- Persistent Search Form -->
+                       <div id="persistent-searchbar-container" class="persistent-searchbar-wrapper">
+                            <form id="persistent-search-form" method="GET" class="flex items-center searchbar" action="/browse/">
+                                
+                                <div class="search-icon" style="padding-left:.25rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="21" viewBox="0 0 21 21" fill="none">
+                                        <path d="M7.50837 14.3092C11.115 14.3092 14.0387 11.3855 14.0387 7.77887C14.0387 4.17227 11.115 1.24854 7.50837 1.24854C3.90176 1.24854 0.978027 4.17227 0.978027 7.77887C0.978027 11.3855 3.90176 14.3092 7.50837 14.3092Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M12.1143 12.375L19.7257 19.9958" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+
+                                <input type="text" id="persistent-opensearch-input" name="query" class="w-full text-md pl-3" placeholder="Search items..." style="border: none; margin: 0; padding: 0 .5rem;">
+                                <a href="#" class="inset-y-0 flex items-center" id="persistent-reset-search" style="display: none;">
+                                    <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+                                    </svg>
+                                </a>
+                            </form>
+                        </div>
+
+
+                        <!-- opensearch mobile popout navbar -->    
+                        <div id="searchbar-container" style="padding: 0.75rem;">
+                            <!-- static filter icon in mobile popout searchbar -->    
+                            <button class="filter-button-trigger button-light" style="margin:0 !important; min-width: 0 !important; height: 42px !important; max-width: 42px !important; min-width: 42px !important; padding:0 !important;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M1 7L13 7M7 13L7 1" stroke="#48110C" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                            </button>
+                            
+                            <form id="search-form" method="GET" class="flex items-center searchbar" action="/browse/">
+                                <input type="text" id="opensearch-input" name="query" class="w-full text-md pl-3" placeholder="Search brand, fabric...">
+                                <a href="#" class="inset-y-0 flex items-center" id="reset-search">
+                                    <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="margin: .25rem;">
+                                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+                                    </svg>
+                                </a>
+                            </form> 
+
+                            <a href="#" id="close-searchbar" class="caption1-semibold">
+                                Close
+                            </a>
+                        </div>
+
+                    </div>
+
+                
+                
+                    <!-- Right column -->
+                    <div class="navbar-right flex items-center space-x-3">
+                        <div class="flex items-center space-x-4 ml-auto">
+                            <a href="/about/" class="navbar-right-link">About</a>
+                            <a href="/browse/" class="navbar-right-link">Browse</a>
+
+                            {% if request.user.is_authenticated %}
+                            <a href="{% url 'core:profile_detail' request.user.username %}" class="profile-picture profile-picture-topnav">
+                                {% if request.user.profile.profile_picture %}
+                                    <img src="{{ request.user.profile.profile_picture.url }}" 
+                                            alt="Profile Picture" 
+                                            class="w-9 h-9 object-cover rounded-full" />
+                                {% else %}
+                                    <div class="w-9 h-9 bg-gray-300 flex items-center justify-center rounded-full">
+                                        <p style="font-size: 1rem; margin: 0;">{{ request.user.username|slice:":1" }}</p>
+                                    </div>                                
+                                {% endif %}
+                            </a>
+                            {% else %}
+                            <a href="{% url 'account_signup' %}" class="signup-link-button">Sign Up</a>
+                            <a href="{% url 'account_login' %}" class="navbar-right-link-login">Log In</a>
+                            {% endif %}
+
+                        </div>                        
+                    </div>
+                </nav>
+            </div>
+
+            {% endblock %}
+                
+            <main>
+                <div>
+                    {% block sidebar %}
+                    {% endblock %}
+
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </main>
+
+            <div class="bottomnav-container">
+                <div class="bottomnav">
+
+                    <!-- Browse Link -->
+                    <a href="/browse/" class="nav-link">
+                        <!-- Active SVG Icon -->
+                        {% if request.path == '/browse/' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 21 20" fill="none">
+                            <path d="M10.4764 0.628418L19.9438 6.63383V19.3758H13.8134V11.002H7.11751V19.3758H0.990234V6.63383L10.4764 0.628418Z" fill="#48110C" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {% else %}
+                        <!-- Inactive SVG Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+                            <path d="M10.4764 1.24854L19.9438 7.25395V19.9959H13.8134V11.6221H7.11751V19.9959H0.990234V7.25395L10.4764 1.24854Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {% endif %}
+                    </a>
+            
+                    <!-- search in bottom nav -->
+                    <div class="searchbar-icon" style="left:2px; top:1px; position: relative; display: inline-block; width: 24px; height: 24px;">
+                        <!--  inactive icon -->
+                        <svg class="default-icon" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+                            <path d="M7.50837 14.3092C11.115 14.3092 14.0387 11.3855 14.0387 7.77887C14.0387 4.17227 11.115 1.24854 7.50837 1.24854C3.90176 1.24854 0.978027 4.17227 0.978027 7.77887C0.978027 11.3855 3.90176 14.3092 7.50837 14.3092Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12.1143 12.375L19.7257 19.9958" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <!--  bold "active" icon -->
+                        <svg class="bold-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7.50857 12.2671C10.33 12.2671 12.6172 9.9799 12.6172 7.15847C12.6172 4.33703 10.33 2.0498 7.50857 2.0498C4.68713 2.0498 2.3999 4.33703 2.3999 7.15847C2.3999 9.9799 4.68713 12.2671 7.50857 12.2671Z" stroke="#48110C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12.1143 11.7549L18.3009 17.9478" stroke="#48110C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    
+
+                    <!-- contact / about -->
+                    <a href="/about/" class="nav-link">
+                        <!-- Active SVG Icon -->
+                        {% if request.path == '/about/' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="22" viewBox="0 0 23 22" fill="none">
+                            <path d="M22.309 10.1177V14.7045C22.309 16.5386 20.9404 18.0478 19.1719 18.2728C19.0032 18.2946 18.8751 18.4384 18.8751 18.6102V20.9974L16.3848 18.8071C16.0161 18.479 15.538 18.3009 15.0475 18.3009H11.2792C9.86069 18.3009 8.63586 17.4823 8.05469 16.2918L8.07656 16.2731C8.539 15.8669 9.12955 15.645 9.74196 15.645H14.4288C16.8972 15.645 18.8969 13.6453 18.8969 11.1738V6.52441C20.7967 6.62128 22.309 8.19293 22.309 10.1177Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14.4294 1H5.18072C2.71232 1 0.709473 2.99972 0.709473 5.46813V11.1736C0.709473 13.4514 2.41236 15.3293 4.61518 15.6105C4.82452 15.6355 4.98075 15.8167 4.98075 16.0292V18.9975L8.05532 16.2916L8.07719 16.2729C8.53963 15.8667 9.13017 15.6448 9.74259 15.6448H14.4294C16.8978 15.6448 18.8976 13.6451 18.8976 11.1736V5.46813C18.8976 2.99972 16.8978 1 14.4294 1Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14.4294 1H5.18072C2.71232 1 0.709473 2.99972 0.709473 5.46813V11.1736C0.709473 13.4514 2.41236 15.3293 4.61518 15.6105C4.82452 15.6355 4.98075 15.8167 4.98075 16.0292V18.9975L8.05532 16.2916L8.07719 16.2729C8.53963 15.8667 9.13017 15.6448 9.74259 15.6448H14.4294C16.8978 15.6448 18.8976 13.6451 18.8976 11.1736V5.46813C18.8976 2.99972 16.8978 1 14.4294 1ZM5.90874 9.28634C5.4713 9.28634 5.1151 8.93015 5.1151 8.49271C5.1151 8.05527 5.4713 7.69907 5.90874 7.69907C6.34618 7.69907 6.70238 8.05527 6.70238 8.49271C6.70238 8.93015 6.34618 9.28634 5.90874 9.28634ZM9.80507 9.28634C9.36764 9.28634 9.01143 8.93015 9.01143 8.49271C9.01143 8.05527 9.36764 7.69907 9.80507 7.69907C10.2425 7.69907 10.5987 8.05527 10.5987 8.49271C10.5987 8.93015 10.2425 9.28634 9.80507 9.28634ZM13.7014 9.28634C13.2608 9.28634 12.9078 8.93015 12.9078 8.49271C12.9078 8.05527 13.2608 7.69907 13.7014 7.69907C14.142 7.69907 14.495 8.05527 14.495 8.49271C14.495 8.93015 14.1388 9.28634 13.7014 9.28634Z" fill="#48110C"/>
+                        </svg>
+                        {% else %}
+                        <!-- Inactive SVG Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="22" viewBox="0 0 23 22" fill="none">
+                            <path d="M22.309 10.1177V14.7045C22.309 16.5386 20.9404 18.0478 19.1719 18.2728C19.0032 18.2946 18.8751 18.4384 18.8751 18.6102V20.9974L16.3848 18.8071C16.0161 18.479 15.538 18.3009 15.0475 18.3009H11.2792C9.86069 18.3009 8.63586 17.4823 8.05469 16.2918L8.07656 16.2731C8.539 15.8669 9.12955 15.645 9.74196 15.645H14.4288C16.8972 15.645 18.8969 13.6453 18.8969 11.1738V6.52441C20.7967 6.62128 22.309 8.19293 22.309 10.1177Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14.4294 1H5.18072C2.71232 1 0.709473 2.99972 0.709473 5.46813V11.1736C0.709473 13.4514 2.41236 15.3293 4.61518 15.6105C4.82452 15.6355 4.98075 15.8167 4.98075 16.0292V18.9975L8.05532 16.2916L8.07719 16.2729C8.53963 15.8667 9.13017 15.6448 9.74259 15.6448H14.4294C16.8978 15.6448 18.8976 13.6451 18.8976 11.1736V5.46813C18.8976 2.99972 16.8978 1 14.4294 1Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M5.90888 9.2865C5.47144 9.2865 5.11523 8.9303 5.11523 8.49286C5.11523 8.05542 5.47144 7.69922 5.90888 7.69922C6.34632 7.69922 6.70252 8.05542 6.70252 8.49286C6.70252 8.9303 6.34632 9.2865 5.90888 9.2865Z" fill="#48110C"/>
+                            <path d="M9.80438 9.2865C9.36695 9.2865 9.01074 8.9303 9.01074 8.49286C9.01074 8.05542 9.36695 7.69922 9.80438 7.69922C10.2418 7.69922 10.598 8.05542 10.598 8.49286C10.598 8.9303 10.2418 9.2865 9.80438 9.2865Z" fill="#48110C"/>
+                            <path d="M13.7014 9.2865C13.2608 9.2865 12.9077 8.9303 12.9077 8.49286C12.9077 8.05542 13.2608 7.69922 13.7014 7.69922C14.1419 7.69922 14.495 8.05542 14.495 8.49286C14.495 8.9303 14.1388 9.2865 13.7014 9.2865Z" fill="#48110C"/>
+                        </svg>
+                        {% endif %}
+                    </a>
+                                            
+                    <!-- profile -->
+                    {% if request.user.is_authenticated %}
+                    <a href="{% url 'core:profile_detail' request.user.username %}" class="profile-picture">
+                        {% if request.user.profile.profile_picture %}
+                            <img src="{{ request.user.profile.profile_picture.url }}" alt="Profile Picture" class="w-6 h-6 object-cover rounded-full" />
+                        {% else %}
+                            <div class="w-6 h-6 bg-gray-300 flex items-center justify-center text-sm rounded-full">
+                                {{ request.user.username|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+                    </a>
+                    
+                    {% else %}
+
+                    <a href="{% url 'account_login' %}" class="nav-link">
+                        <!-- Active SVG Icon -->
+                        <svg class="active-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
+                            <path d="M20.7658 11.0015C20.7658 13.7637 19.6472 16.2633 17.8381 18.0724C16.0289 19.8847 13.5293 21.0001 10.7672 21.0001C8.00505 21.0001 5.50539 19.8815 3.69627 18.0724C1.88402 16.2633 0.768555 13.7637 0.768555 11.0015C0.768555 5.48043 5.24606 1.00293 10.7672 1.00293C16.2883 1.00293 20.7658 5.48043 20.7658 11.0015Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10.7639 11.8485C12.3825 11.8485 13.6947 10.5363 13.6947 8.91766C13.6947 7.299 12.3825 5.98682 10.7639 5.98682C9.14519 5.98682 7.83301 7.299 7.83301 8.91766C7.83301 10.5363 9.14519 11.8485 10.7639 11.8485Z" fill="#48110C" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M17.8351 18.0727C16.026 19.885 13.5264 21.0005 10.7642 21.0005C8.00214 21.0005 5.50248 19.8819 3.69336 18.0727C5.50248 16.2605 8.00214 15.145 10.7642 15.145C13.5264 15.145 16.026 16.2636 17.8351 18.0727Z" fill="#48110C" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        
+                        <!-- Inactive SVG Icon -->
+                        <svg class="inactive-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
+                            <path d="M20.7658 10.6221C20.7658 13.3843 19.6472 15.8839 17.8381 17.693C16.0289 19.5053 13.5293 20.6207 10.7672 20.6207C8.00505 20.6207 5.50539 19.5022 3.69627 17.693C1.88402 15.8839 0.768555 13.3843 0.768555 10.6221C0.768555 5.10104 5.24606 0.623535 10.7672 0.623535C16.2883 0.623535 20.7658 5.10104 20.7658 10.6221Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10.7639 11.4691C12.3825 11.4691 13.6947 10.1569 13.6947 8.53826C13.6947 6.91961 12.3825 5.60742 10.7639 5.60742C9.14519 5.60742 7.83301 6.91961 7.83301 8.53826C7.83301 10.1569 9.14519 11.4691 10.7639 11.4691Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M17.8351 17.6929C16.026 19.5051 13.5264 20.6206 10.7642 20.6206C8.00214 20.6206 5.50248 19.502 3.69336 17.6929C5.50248 15.8806 8.00214 14.7651 10.7642 14.7651C13.5264 14.7651 16.026 15.8837 17.8351 17.6929Z" stroke="#48110C" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                    {% endif %}                    
+                </div>
+            </div>
+
+            <footer class="flex flex-col md:flex-row">
+                     
+                <div class="w-full md:w-2/6">
+                    <p><a href="/about/">About</a></p>
+                    <p><a href="/browse/">Browse</a></p>
+                    <a href="https://www.instagram.com/finde.clothing" target="_blank">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.46471 1.0662C8.63794 1.01266 9.01258 1 12 1C14.9874 1 15.362 1.01266 16.5352 1.0662C17.7061 1.1196 18.5057 1.30556 19.2054 1.57751C19.9288 1.85858 20.5422 2.2347 21.1537 2.84623C21.7653 3.45779 22.1414 4.07123 22.4225 4.79454C22.6944 5.49426 22.8804 6.29385 22.9338 7.46471C22.9873 8.63798 23 9.01258 23 12C23 14.9874 22.9873 15.362 22.9338 16.5353C22.8804 17.7061 22.6944 18.5057 22.4225 19.2054C22.1414 19.9288 21.7653 20.5422 21.1537 21.1537C20.5422 21.7653 19.9288 22.1414 19.2054 22.4225C18.5057 22.6944 17.7061 22.8804 16.5352 22.9338C15.362 22.9873 14.9874 23 12 23C9.01258 23 8.63794 22.9873 7.46471 22.9338C6.29385 22.8804 5.49426 22.6944 4.79454 22.4225C4.07123 22.1414 3.45775 21.7653 2.84623 21.1537C2.23466 20.5422 1.85858 19.9287 1.57746 19.2054C1.30552 18.5057 1.1196 17.7061 1.06615 16.5353C1.01262 15.362 1 14.9874 1 12C1 9.01254 1.01262 8.63798 1.06615 7.46471C1.1196 6.29385 1.30552 5.49426 1.57746 4.79454C1.85858 4.07123 2.23466 3.45779 2.84623 2.84623C3.45775 2.2347 4.07123 1.85858 4.79454 1.57751C5.49426 1.30556 6.29385 1.1196 7.46471 1.0662ZM16.4449 3.04608C15.285 2.99316 14.9371 2.98198 12 2.98198C9.06284 2.98198 8.71496 2.99316 7.55501 3.04608C6.48257 3.09503 5.90008 3.27423 5.51247 3.42487C4.99906 3.62442 4.63259 3.86278 4.24768 4.24773C3.86278 4.63263 3.62437 4.99906 3.42482 5.51252C3.27423 5.90013 3.09503 6.48257 3.04608 7.55506C2.99316 8.71496 2.98198 9.06288 2.98198 12C2.98198 14.9371 2.99316 15.285 3.04608 16.4449C3.09503 17.5174 3.27423 18.0999 3.42482 18.4875C3.62437 19.0009 3.86278 19.3674 4.24768 19.7523C4.63259 20.1372 4.99906 20.3756 5.51247 20.5751C5.90008 20.7257 6.48257 20.905 7.55506 20.9539C8.71479 21.0068 9.06262 21.018 12 21.018C14.9373 21.018 15.2852 21.0068 16.4449 20.9539C17.5174 20.905 18.0998 20.7257 18.4874 20.5751C19.0009 20.3756 19.3674 20.1372 19.7523 19.7523C20.1372 19.3674 20.3755 19.0009 20.5751 18.4875C20.7257 18.0999 20.9049 17.5174 20.9539 16.4449C21.0068 15.285 21.018 14.9371 21.018 12C21.018 9.06288 21.0068 8.71496 20.9539 7.55506C20.9049 6.48257 20.7257 5.90013 20.5751 5.51252C20.3755 4.99906 20.1372 4.63263 19.7523 4.24768C19.3674 3.86278 19.0009 3.62442 18.4874 3.42487C18.0998 3.27423 17.5174 3.09503 16.4449 3.04608ZM8.33329 12C8.33329 14.025 9.97495 15.6667 12 15.6667C14.025 15.6667 15.6667 14.025 15.6667 12C15.6667 9.97495 14.025 8.33333 12 8.33333C9.97495 8.33333 8.33329 9.97495 8.33329 12ZM6.35131 12C6.35131 8.88032 8.88032 6.35136 12 6.35136C15.1196 6.35136 17.6486 8.88032 17.6486 12C17.6486 15.1197 15.1196 17.6486 12 17.6486C8.88032 17.6486 6.35131 15.1197 6.35131 12ZM17.8718 7.44816C18.6008 7.44816 19.1918 6.8572 19.1918 6.12818C19.1918 5.39915 18.6008 4.8082 17.8718 4.8082C17.1428 4.8082 16.5518 5.39915 16.5518 6.12818C16.5518 6.8572 17.1428 7.44816 17.8718 7.44816Z" fill="#48110C"/>
+                            <mask id="mask0_2844_2717" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="1" y="1" width="22" height="22">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.46471 1.0662C8.63794 1.01266 9.01258 1 12 1C14.9874 1 15.362 1.01266 16.5352 1.0662C17.7061 1.1196 18.5057 1.30556 19.2054 1.57751C19.9288 1.85858 20.5422 2.2347 21.1537 2.84623C21.7653 3.45779 22.1414 4.07123 22.4225 4.79454C22.6944 5.49426 22.8804 6.29385 22.9338 7.46471C22.9873 8.63798 23 9.01258 23 12C23 14.9874 22.9873 15.362 22.9338 16.5353C22.8804 17.7061 22.6944 18.5057 22.4225 19.2054C22.1414 19.9288 21.7653 20.5422 21.1537 21.1537C20.5422 21.7653 19.9288 22.1414 19.2054 22.4225C18.5057 22.6944 17.7061 22.8804 16.5352 22.9338C15.362 22.9873 14.9874 23 12 23C9.01258 23 8.63794 22.9873 7.46471 22.9338C6.29385 22.8804 5.49426 22.6944 4.79454 22.4225C4.07123 22.1414 3.45775 21.7653 2.84623 21.1537C2.23466 20.5422 1.85858 19.9287 1.57746 19.2054C1.30552 18.5057 1.1196 17.7061 1.06615 16.5353C1.01262 15.362 1 14.9874 1 12C1 9.01254 1.01262 8.63798 1.06615 7.46471C1.1196 6.29385 1.30552 5.49426 1.57746 4.79454C1.85858 4.07123 2.23466 3.45779 2.84623 2.84623C3.45775 2.2347 4.07123 1.85858 4.79454 1.57751C5.49426 1.30556 6.29385 1.1196 7.46471 1.0662ZM16.4449 3.04608C15.285 2.99316 14.9371 2.98198 12 2.98198C9.06284 2.98198 8.71496 2.99316 7.55501 3.04608C6.48257 3.09503 5.90008 3.27423 5.51247 3.42487C4.99906 3.62442 4.63259 3.86278 4.24768 4.24773C3.86278 4.63263 3.62437 4.99906 3.42482 5.51252C3.27423 5.90013 3.09503 6.48257 3.04608 7.55506C2.99316 8.71496 2.98198 9.06288 2.98198 12C2.98198 14.9371 2.99316 15.285 3.04608 16.4449C3.09503 17.5174 3.27423 18.0999 3.42482 18.4875C3.62437 19.0009 3.86278 19.3674 4.24768 19.7523C4.63259 20.1372 4.99906 20.3756 5.51247 20.5751C5.90008 20.7257 6.48257 20.905 7.55506 20.9539C8.71479 21.0068 9.06262 21.018 12 21.018C14.9373 21.018 15.2852 21.0068 16.4449 20.9539C17.5174 20.905 18.0998 20.7257 18.4874 20.5751C19.0009 20.3756 19.3674 20.1372 19.7523 19.7523C20.1372 19.3674 20.3755 19.0009 20.5751 18.4875C20.7257 18.0999 20.9049 17.5174 20.9539 16.4449C21.0068 15.285 21.018 14.9371 21.018 12C21.018 9.06288 21.0068 8.71496 20.9539 7.55506C20.9049 6.48257 20.7257 5.90013 20.5751 5.51252C20.3755 4.99906 20.1372 4.63263 19.7523 4.24768C19.3674 3.86278 19.0009 3.62442 18.4874 3.42487C18.0998 3.27423 17.5174 3.09503 16.4449 3.04608ZM8.33329 12C8.33329 14.025 9.97495 15.6667 12 15.6667C14.025 15.6667 15.6667 14.025 15.6667 12C15.6667 9.97495 14.025 8.33333 12 8.33333C9.97495 8.33333 8.33329 9.97495 8.33329 12ZM6.35131 12C6.35131 8.88032 8.88032 6.35136 12 6.35136C15.1196 6.35136 17.6486 8.88032 17.6486 12C17.6486 15.1197 15.1196 17.6486 12 17.6486C8.88032 17.6486 6.35131 15.1197 6.35131 12ZM17.8718 7.44816C18.6008 7.44816 19.1918 6.8572 19.1918 6.12818C19.1918 5.39915 18.6008 4.8082 17.8718 4.8082C17.1428 4.8082 16.5518 5.39915 16.5518 6.12818C16.5518 6.8572 17.1428 7.44816 17.8718 7.44816Z" fill="white"/>
+                            </mask>
+                            <g mask="url(#mask0_2844_2717)">
+                            </g>
+                        </svg>
+                    </a>
+                </div>
+        
+                <div class="w-full md:w-2/6">
+                    <p><a href="mailto:hello@finde.clothing">hello@finde.clothing</a></p>
+                </div>
+
+                <div class="w-full md:w-2/6">
+                    <p style="padding-bottom:1rem;">Newsletter Signup</p>
+                    <form method="post" action="{% url 'capture_email' %}">
+                        {% csrf_token %}
+                        <input type="email" name="email" placeholder="Enter your email" 
+                        class="mb-2 w-full max-w-xs border rounded-full focus:outline-none focus:ring-1 focus:ring-[#0073ff] focus:border-[#0073ff] transition"
+                        style="border-radius: 9999px !important; padding: .5rem 1rem !important; margin-bottom: 1.25rem !important">
+                        <button type="submit" class="button-light" style="margin:0 0 1rem 0;">Subscribe</button>
+                        {% if messages %}
+                        <ul class="text-white" style="opacity: .55">
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    </form>
+                </div>
+
+            </footer>
+
+            <div>
+                <p class="footer text-sm  text-center" style="padding:1rem;">
+                    © {{ now|date:"Y" }} Finde™ LLC. All rights reserved.
+                    <a href="/tos/">Privacy Policy & Terms of Service</a>
+                </p>
+            </div>
+            
+        </div>  <!-- End Container -->
+
+
+        {% block recaptcha %}
+
+        <script>
+            function onRecaptchaLoaded() {
+                const buttons = document.querySelectorAll('.button-dark.inactive');
+                buttons.forEach(button => {
+                    button.classList.remove('inactive');
+                    button.disabled = false;
+
+                    // Hide the spinner once the button is enabled
+                    const spinner = button.querySelector('.spinner');
+                    if (spinner) {
+                        spinner.style.display = 'none'; // Hide the spinner
+                    }
+                });
+            }
+
+            // Function to show loading animation
+            function showLoading() {
+                const buttons = document.querySelectorAll('.button-dark.inactive');
+                buttons.forEach(button => {
+                    const spinner = button.querySelector('.spinner');
+                    if (spinner) {
+                        spinner.style.display = 'block'; // Show the spinner
+                    }
+                });
+            }
+
+            // Call showLoading when the captcha is executing
+            grecaptcha.ready(function() {
+                showLoading(); // Show loading animation when executing captcha
+                grecaptcha.execute('6LeomTgqAAAAAMtjzmmPKW3Lf14A8T_80DojiJB7', {action: 'login'}).then(function(token) {
+                    document.getElementById('g-recaptcha-response').value = token;
+                    onRecaptchaLoaded();
+                });
+            });
+
+
+                function onSubmit(e) {
+                    e.preventDefault(); 
+                    grecaptcha.execute(); 
+                }
+
+                function submitForm(token) {
+                    const form = document.querySelector('form'); 
+                    const recaptchaResponseInput = document.createElement('input'); 
+                    recaptchaResponseInput.type = 'hidden'; 
+                    recaptchaResponseInput.name = 'g-recaptcha-response'; 
+                    recaptchaResponseInput.value = token;
+
+                    form.appendChild(recaptchaResponseInput); 
+                    form.submit(); 
+                }
+
+                window.submitForm = submitForm;
+        </script>
+        {% endblock recaptcha %}
+
+    </body>
+</html>
+
+
+
+<script>
+    
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.close-alert').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                btn.parentElement.style.display = 'none';
+            });
+        });
+    });
+
+/* Set the width of the side navigation */
+function openNav() {
+  document.getElementById("mySidenav").style.width = "178px";
+}
+
+/* Set the width of the side navigation to 0 */
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+}
+</script>
+
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

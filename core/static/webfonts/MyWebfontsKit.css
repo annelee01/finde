@@ -1,0 +1,38 @@
+/**
+ * @license
+ * MyFonts Webfont Build ID 3867246, 2020-12-16T11:57:38-0500
+ * 
+ * The fonts listed in this notice are subject to the End User License
+ * Agreement(s) entered into by the website owner. All other parties are 
+ * explicitly restricted from using the Licensed Webfonts(s).
+ * 
+ * You may obtain a valid license at the URLs below.
+ * 
+ * Webfont: Antura Script by Solidtype
+ * URL: https://www.myfonts.com/collections/solidtype-foundry
+
+ * Webfont: Adobe Caslon Pro Regular by Adobe
+ * URL: https://www.myfonts.com/collections/adobe-foundry
+
+ * Webfont: Adobe Caslon Pro Italic by Adobe
+ * URL: https://www.myfonts.com/collections/adobe-foundry
+ 
+ * © 2025 MyFonts Inc. */
+
+
+  
+@font-face {
+  font-family: "AdobeCaslonProRegular";
+  src: url('/static/webfonts/AdobeCaslonProRegular/font.woff2') format('woff2'), url('/static/webfonts/AdobeCaslonProRegular/font.woff') format('woff');
+}
+
+@font-face {
+  font-family: "AdobeCaslonProItalic";
+  src: url('/static/webfonts/AdobeCaslonProItalic/font.woff2') format('woff2'), url('/static/webfonts/AdobeCaslonProItalic/font.woff') format('woff');
+}
+
+@font-face {
+  font-family: "AnturaScript";
+  src: url('/static/webfonts/AnturaScript/font.woff2') format('woff2'), url('/static/webfonts/AnturaScript/font.woff') format('woff');
+}
+
